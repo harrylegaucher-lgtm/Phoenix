@@ -2424,185 +2424,204 @@ if('serviceWorker' in navigator) {
   });
 }
 
-// ── UNIVERSAL TOUCH-DRAG ENGINE ──────────────────────────────────────────
-// Replaces HTML5 drag events with touch equivalents for iOS/iPad Safari.
-// Works alongside existing dragstart/dragover/drop handlers — on touch devices
-// the HTML5 drag is disabled and we simulate it manually.
+// ── UNIVERSAL TOUCH-DRAG ENGINE v2 ─────────────────────────────────────
+// Strategy: don't patch addEventListener. Instead, run AFTER all handlers
+// are registered, then on touchend use elementFromPoint to find the drop
+// target and manually fire the registered drop handler.
 
 (function() {
-  let ghost = null;
-  let dragData = null; // { element, transferData, offsetX, offsetY }
+  // Central registry: dropzone el → { dropHandler, overHandler, leaveHandler }
+  const dropRegistry = new WeakMap();
+  // Central registry: draggable el → { dragStartHandler }
+  const dragRegistry  = new WeakMap();
 
-  function getElementCenter(el) {
-    const r = el.getBoundingClientRect();
-    return { x: r.left + r.width/2, y: r.top + r.height/2 };
+  let ghost = null;
+  let dragState = null; // { element, transferData }
+  let lastOverZone = null;
+
+  // ── Observe DOM mutations to auto-register drag/drop elements ──────────
+  function registerEl(el) {
+    if(!el || el.nodeType !== 1) return;
+    // Draggable
+    if(el.draggable && !el._touchRegistered) {
+      el._touchRegistered = true;
+      el.addEventListener('touchstart', onTouchStart, { passive: false });
+    }
   }
 
+  function scanAndRegister(root) {
+    if(!root) return;
+    if(root.draggable) registerEl(root);
+    root.querySelectorAll && root.querySelectorAll('[draggable="true"]').forEach(registerEl);
+  }
+
+  const observer = new MutationObserver(mutations => {
+    mutations.forEach(m => {
+      m.addedNodes.forEach(n => { if(n.nodeType===1) scanAndRegister(n); });
+      // Also check attribute changes (draggable set dynamically)
+      if(m.type==='attributes' && m.attributeName==='draggable') registerEl(m.target);
+    });
+  });
+  observer.observe(document.body, { childList:true, subtree:true, attributes:true, attributeFilter:['draggable'] });
+
+  // Run once after page load
+  window.addEventListener('load', () => scanAndRegister(document.body));
+  // Also run immediately (for elements already in DOM)
+  setTimeout(() => scanAndRegister(document.body), 0);
+
+  // ── Ghost ──────────────────────────────────────────────────────────────
   function createGhost(el, x, y) {
     ghost = document.createElement('div');
     ghost.id = 'touch-drag-ghost';
-    ghost.textContent = el.textContent.trim().replace(/[×✓★☆▶]/g,'').trim();
+    // Clean text: remove icon chars
+    ghost.textContent = (el.textContent||'').trim().replace(/[×✓★☆▶⟨⟩]/g,'').trim().slice(0,30);
     document.body.appendChild(ghost);
     moveGhost(x, y);
   }
-
   function moveGhost(x, y) {
     if(!ghost) return;
-    ghost.style.left = x + 'px';
-    ghost.style.top  = y + 'px';
+    ghost.style.left = x+'px'; ghost.style.top = y+'px';
   }
+  function removeGhost() { if(ghost){ ghost.remove(); ghost=null; } }
 
-  function removeGhost() {
-    if(ghost) { ghost.remove(); ghost = null; }
-  }
-
-  function getDropTarget(x, y) {
-    if(ghost) ghost.style.display = 'none';
+  // ── Hit test: element from point, ignoring ghost ──────────────────────
+  function hitTest(x, y) {
+    if(ghost) ghost.style.visibility='hidden';
     const el = document.elementFromPoint(x, y);
-    if(ghost) ghost.style.display = '';
+    if(ghost) ghost.style.visibility='';
     return el;
   }
 
+  // Walk up DOM to find closest drop zone (has data-drop-zone or registered)
   function findDropZone(el) {
-    // Walk up DOM to find an element that has a drop handler
     let cur = el;
     while(cur && cur !== document.body) {
-      if(cur._touchDropHandler) return cur;
+      if(cur._hasDropHandler) return cur;
       cur = cur.parentElement;
     }
     return null;
   }
 
-  function findDraggable(el) {
-    let cur = el;
-    while(cur && cur !== document.body) {
-      if(cur.draggable && cur._touchDragData !== undefined) return cur;
-      cur = cur.parentElement;
-    }
-    return null;
+  // ── Touch handlers ─────────────────────────────────────────────────────
+  function onTouchStart(e) {
+    if(e.touches.length !== 1) return;
+    // Only start drag after a short hold (50ms) to distinguish scroll from drag
+    const el = this;
+    const touch = e.touches[0];
+    const startX = touch.clientX, startY = touch.clientY;
+    let holdTimer = null;
+    let started = false;
+
+    const cancel = () => { clearTimeout(holdTimer); };
+
+    const tryStart = () => {
+      // Fire dragstart
+      const transferData = {};
+      const fakeEvent = {
+        dataTransfer: { setData:(k,v)=>{ transferData[k]=v; }, getData:(k)=>transferData[k]||'' },
+        preventDefault:()=>{}, stopPropagation:()=>{},
+        clientX: startX, clientY: startY, target: el
+      };
+      // Find and call the dragstart handler
+      const handlers = el._dragStartHandlers||[];
+      handlers.forEach(h => h.call(el, fakeEvent));
+
+      dragState = { element:el, transferData };
+      el.classList.add('dragging');
+      createGhost(el, startX, startY);
+      started = true;
+      e.preventDefault();
+    };
+
+    // Detect: if finger moves before hold, it's a scroll
+    const onMove = (ev) => {
+      if(!started) {
+        const t = ev.touches[0];
+        const dx = t.clientX-startX, dy = t.clientY-startY;
+        if(Math.abs(dx)>8||Math.abs(dy)>8) { cancel(); document.removeEventListener('touchmove',onMove); }
+      }
+    };
+
+    holdTimer = setTimeout(tryStart, 50);
+    document.addEventListener('touchmove', onMove, { passive:true, once:true });
+    el.addEventListener('touchend', cancel, { once:true });
   }
 
-  // Patch: intercept addEventListener to capture drag/drop handlers
-  const origAddEventListener = EventTarget.prototype.addEventListener;
-  EventTarget.prototype.addEventListener = function(type, handler, options) {
-    if(type === 'dragstart') {
-      this._touchDragData = this._touchDragData || null;
-      const origHandler = handler;
-      // Store a synthetic dataTransfer-like object
-      const self = this;
-      origAddEventListener.call(this, 'touchstart', function(e) {
-        if(e.touches.length !== 1) return;
-        const touch = e.touches[0];
-        const rect = self.getBoundingClientRect();
-        // Create fake dataTransfer
-        let _transferData = {};
-        const fakeEvent = {
-          dataTransfer: {
-            setData: (k,v) => { _transferData[k]=v; },
-            getData: (k) => _transferData[k]||'',
-          },
-          preventDefault: ()=>{},
-          stopPropagation: ()=>{},
-          clientX: touch.clientX, clientY: touch.clientY,
-          target: self
-        };
-        origHandler.call(self, fakeEvent);
-        self._touchTransferData = _transferData;
-        dragData = {
-          element: self,
-          transferData: _transferData,
-          offsetX: touch.clientX - rect.left,
-          offsetY: touch.clientY - rect.top,
-        };
-        createGhost(self, touch.clientX, touch.clientY);
-        // Add active class
-        self.classList.add('dragging');
-        e.preventDefault();
-      }, { passive: false });
-    }
-    else if(type === 'dragover') {
-      const origHandler = handler;
-      const self = this;
-      this._touchDropHandler = true;
-      origAddEventListener.call(this, 'touchmove', function(e) {
-        if(!dragData) return;
-        const touch = e.touches[0];
-        moveGhost(touch.clientX, touch.clientY);
-        const dropZone = findDropZone(getDropTarget(touch.clientX, touch.clientY));
-        if(dropZone === self) {
-          const fakeEvent = { preventDefault:()=>{}, clientX:touch.clientX, clientY:touch.clientY };
-          origHandler.call(self, fakeEvent);
-        }
-        e.preventDefault();
-      }, { passive: false });
-    }
-    else if(type === 'dragleave') {
-      // handled implicitly
-    }
-    else if(type === 'drop') {
-      const origHandler = handler;
-      const self = this;
-      origAddEventListener.call(this, 'touchend', function(e) {
-        if(!dragData) return;
-        const touch = e.changedTouches[0];
-        const dropZone = findDropZone(getDropTarget(touch.clientX, touch.clientY));
-        if(dropZone === self || self.contains(dropZone)) {
-          const fakeEvent = {
-            preventDefault: ()=>{},
-            stopPropagation: ()=>{},
-            dataTransfer: { getData: k => dragData.transferData[k]||'' },
-            clientX: touch.clientX, clientY: touch.clientY,
-          };
-          origHandler.call(self, fakeEvent);
-        }
-        // Cleanup
-        if(dragData.element) dragData.element.classList.remove('dragging');
-        removeGhost();
-        // Remove 'over' classes
-        document.querySelectorAll('.over,.drop-over,.setup-over').forEach(el=>el.classList.remove('over','drop-over','setup-over'));
-        dragData = null;
-      }, { passive: false });
-    }
-    else if(type === 'dragend') {
-      const origHandler = handler;
-      const self = this;
-      origAddEventListener.call(this, 'touchend', function(e) {
-        origHandler.call(self, e);
-        removeGhost();
-        dragData = null;
-      }, { passive: false });
-    }
-    // Always call original
-    return origAddEventListener.call(this, type, handler, options);
-  };
-
-  // Global touchmove: move ghost
+  // ── Global touchmove: move ghost + highlight drop zone ─────────────────
   document.addEventListener('touchmove', function(e) {
-    if(!dragData) return;
+    if(!dragState) return;
     const touch = e.touches[0];
     moveGhost(touch.clientX, touch.clientY);
-    // Highlight drop zone under finger
-    const target = getDropTarget(touch.clientX, touch.clientY);
-    const dropZone = findDropZone(target);
-    document.querySelectorAll('.over,.drop-over,.setup-over').forEach(el=>{
-      if(el !== dropZone) el.classList.remove('over','drop-over','setup-over');
-    });
-    if(dropZone) dropZone.classList.add('over');
-  }, { passive: false });
-
-  // Global touchend: cleanup if drop wasn't handled
-  document.addEventListener('touchend', function() {
-    if(!dragData) return;
-    setTimeout(()=>{
-      if(dragData) {
-        if(dragData.element) dragData.element.classList.remove('dragging');
-        removeGhost(); dragData = null;
+    const target = hitTest(touch.clientX, touch.clientY);
+    const zone = findDropZone(target);
+    if(zone !== lastOverZone) {
+      if(lastOverZone) {
+        lastOverZone.classList.remove('over','drop-over','setup-over');
+        (lastOverZone._dragLeaveHandlers||[]).forEach(h=>h.call(lastOverZone,{}));
       }
-    }, 50);
-  }, { passive: true });
+      if(zone) {
+        zone.classList.add('over');
+        (zone._dragOverHandlers||[]).forEach(h=>h.call(zone,{preventDefault:()=>{}}));
+      }
+      lastOverZone = zone;
+    }
+    e.preventDefault();
+  }, { passive:false });
 
+  // ── Global touchend: fire drop ─────────────────────────────────────────
+  document.addEventListener('touchend', function(e) {
+    if(!dragState) return;
+    const touch = e.changedTouches[0];
+    const target = hitTest(touch.clientX, touch.clientY);
+    const zone = findDropZone(target);
+
+    if(zone) {
+      zone.classList.remove('over','drop-over','setup-over');
+      const fakeEvent = {
+        preventDefault:()=>{}, stopPropagation:()=>{},
+        dataTransfer:{ getData: k => dragState.transferData[k]||'' },
+        clientX:touch.clientX, clientY:touch.clientY
+      };
+      (zone._dropHandlers||[]).forEach(h=>h.call(zone, fakeEvent));
+    }
+
+    // Cleanup
+    if(dragState.element) dragState.element.classList.remove('dragging');
+    removeGhost();
+    document.querySelectorAll('.over,.drop-over,.setup-over').forEach(el=>el.classList.remove('over','drop-over','setup-over'));
+    // Fire dragend
+    if(dragState.element) {
+      (dragState.element._dragEndHandlers||[]).forEach(h=>h.call(dragState.element,{}));
+    }
+    dragState = null; lastOverZone = null;
+  }, { passive:false });
+
+  // ── Patch addEventListener BEFORE any other script runs ───────────────
+  // We patch it to RECORD handlers, not to replace them.
+  // Execution order: this IIFE runs last (end of body), so all handlers
+  // are already registered via the normal addEventListener. We re-scan.
+  // Better approach: patch addEventListener early via a <script> at top of <head>
+  // Since we can't do that easily, we use a registry populated by MutationObserver
+  // + a post-load scan, combined with a monkey-patch that captures future registrations.
+
+  const _orig = EventTarget.prototype.addEventListener;
+  EventTarget.prototype.addEventListener = function(type, handler, opts) {
+    _orig.call(this, type, handler, opts);
+    if(type==='dragstart'){ (this._dragStartHandlers=this._dragStartHandlers||[]).push(handler); this._touchRegistered=false; registerEl(this); }
+    if(type==='dragover') { (this._dragOverHandlers=this._dragOverHandlers||[]).push(handler); this._hasDropHandler=true; }
+    if(type==='dragleave'){ (this._dragLeaveHandlers=this._dragLeaveHandlers||[]).push(handler); }
+    if(type==='drop')     { (this._dropHandlers=this._dropHandlers||[]).push(handler); this._hasDropHandler=true; }
+    if(type==='dragend')  { (this._dragEndHandlers=this._dragEndHandlers||[]).push(handler); }
+  };
+
+  // Re-scan existing elements to pick up already-registered handlers
+  // We can't recover already-registered handlers retroactively,
+  // but the monkey-patch above will catch all FUTURE registrations.
+  // The app calls initPlay() / renderSetup() etc. which re-create elements
+  // and re-register handlers — so this works correctly.
+
+  console.log('[Phoenix] Touch-drag engine v2 loaded');
 })();
 
 </script>
 </body>
-</html>
