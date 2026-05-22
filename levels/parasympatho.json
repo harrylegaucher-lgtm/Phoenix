@@ -1,0 +1,279 @@
+{
+  "name": "Parasympatho",
+  "cats": [
+    {
+      "name": "Parasympathomimétique direct",
+      "id": "c1779460977503",
+      "parentId": null
+    },
+    {
+      "name": "Parasympathomimétique indirect",
+      "id": "c1779460983191",
+      "parentId": null
+    },
+    {
+      "name": "antimuscarinique",
+      "id": "c1779460989487",
+      "parentId": null
+    },
+    {
+      "name": "Esters de choline",
+      "id": "c1779460998544",
+      "parentId": "c1779460977503"
+    },
+    {
+      "name": "alcaloide naturels",
+      "id": "c1779461005014",
+      "parentId": "c1779460977503"
+    },
+    {
+      "name": "analogues synthéthiques",
+      "id": "c1779461015265",
+      "parentId": "c1779460977503"
+    },
+    {
+      "name": "Synthèse",
+      "id": "c1779461026520",
+      "parentId": "c1779460983191"
+    },
+    {
+      "name": "Libération",
+      "id": "c1779461042745",
+      "parentId": "c1779460983191"
+    },
+    {
+      "name": "anticholinesterases",
+      "id": "c1779461577947",
+      "parentId": "c1779460983191"
+    },
+    {
+      "name": "réversible",
+      "id": "c1779461583308",
+      "parentId": "c1779461577947"
+    },
+    {
+      "name": "irréversible",
+      "id": "c1779461589333",
+      "parentId": "c1779461577947"
+    },
+    {
+      "name": "alcaloides naturels",
+      "id": "c1779462015350",
+      "parentId": "c1779460989487"
+    },
+    {
+      "name": "dérivés synthéthiques",
+      "id": "c1779462028165",
+      "parentId": "c1779460989487"
+    },
+    {
+      "name": "ammonium quaternaire",
+      "id": "c1779462113135",
+      "parentId": "c1779462028165"
+    },
+    {
+      "name": "amine tertiaire",
+      "id": "c1779462118678",
+      "parentId": "c1779462028165"
+    }
+  ],
+  "words": [
+    {
+      "text": "Métacholine",
+      "catIds": [
+        "c1779460998544"
+      ],
+      "id": "w1779461065529",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Béthanéchol",
+      "catIds": [
+        "c1779460998544"
+      ],
+      "id": "w1779461087010",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Carbachol",
+      "catIds": [
+        "c1779460998544"
+      ],
+      "id": "w1779461092938",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Acéclidine",
+      "catIds": [
+        "c1779461015265"
+      ],
+      "id": "w1779461095808",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Pilocarpine",
+      "catIds": [
+        "c1779461005014"
+      ],
+      "id": "w1779461100786",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "aréoline",
+      "catIds": [
+        "c1779461005014"
+      ],
+      "id": "w1779461104946",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "muscarine",
+      "catIds": [
+        "c1779461005014"
+      ],
+      "id": "w1779461107242",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "CITICHOLINE",
+      "catIds": [
+        "c1779461026520"
+      ],
+      "id": "w1779461174987",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Cisapride",
+      "catIds": [
+        "c1779461042745"
+      ],
+      "id": "w1779461179922",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "physostigmine",
+      "catIds": [
+        "c1779461583308"
+      ],
+      "id": "w1779461597172",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "néostigmine",
+      "catIds": [
+        "c1779461583308"
+      ],
+      "id": "w1779461603468",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "rivastigmine",
+      "catIds": [
+        "c1779461583308"
+      ],
+      "id": "w1779461605813",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "pyridostigmine",
+      "catIds": [
+        "c1779461583308"
+      ],
+      "id": "w1779461623397",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "organophosphorés",
+      "catIds": [
+        "c1779461589333"
+      ],
+      "id": "w1779461658381",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "antidote pralidoxime",
+      "catIds": [
+        "c1779461589333"
+      ],
+      "id": "w1779461666310",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Malathion",
+      "catIds": [
+        "c1779461589333"
+      ],
+      "id": "w1779461675894",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "atropine",
+      "catIds": [
+        "c1779462015350"
+      ],
+      "id": "w1779462034413",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Scopolamine",
+      "catIds": [
+        "c1779462015350"
+      ],
+      "id": "w1779462036957",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Solanacés",
+      "catIds": [
+        "c1779462015350"
+      ],
+      "id": "w1779462040837",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "tropicamide",
+      "catIds": [
+        "c1779462118678"
+      ],
+      "id": "w1779462126648",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "ipratropium",
+      "catIds": [
+        "c1779462113135"
+      ],
+      "id": "w1779462147520",
+      "starred": false,
+      "note": ""
+    }
+  ],
+  "schemaPoints": [],
+  "schemaImageDataUrl": null,
+  "refParams": [],
+  "treeTraits": [],
+  "treeEntities": [],
+  "treeValues": [],
+  "savedAt": "22/05/2026 19:27",
+  "version": 6
+}

@@ -1,0 +1,309 @@
+{
+  "name": "Symatho-Parasympatho",
+  "cats": [
+    {
+      "name": "sympathomimétiques indirects",
+      "id": "c1779445662636",
+      "parentId": null
+    },
+    {
+      "name": "sympathomimétiques directs",
+      "id": "c1779445673739",
+      "parentId": null
+    },
+    {
+      "name": "a stimulants",
+      "id": "c1779445679228",
+      "parentId": "c1779445673739"
+    },
+    {
+      "name": "Libération",
+      "id": "c1779445786150",
+      "parentId": "c1779445662636"
+    },
+    {
+      "name": "Synthèse",
+      "id": "c1779445794527",
+      "parentId": "c1779445662636"
+    },
+    {
+      "name": "élimination",
+      "id": "c1779445812023",
+      "parentId": "c1779445662636"
+    },
+    {
+      "name": "sympatholytiques indirects",
+      "id": "c1779446045027",
+      "parentId": null
+    },
+    {
+      "name": "Synthèse",
+      "id": "c1779446064020",
+      "parentId": "c1779446045027"
+    },
+    {
+      "name": "Stockage",
+      "id": "c1779446173838",
+      "parentId": "c1779446045027"
+    },
+    {
+      "name": "Libération",
+      "id": "c1779446344386",
+      "parentId": "c1779446045027"
+    },
+    {
+      "name": "B stimulants",
+      "id": "c1779446826343",
+      "parentId": "c1779445673739"
+    },
+    {
+      "name": "a B stimulants",
+      "id": "c1779446909358",
+      "parentId": "c1779445673739"
+    },
+    {
+      "name": "Sympatholytiques directs",
+      "id": "c1779446961807",
+      "parentId": null
+    },
+    {
+      "name": "a bloquants",
+      "id": "c1779447338656",
+      "parentId": "c1779446961807"
+    },
+    {
+      "name": "B bloaquants",
+      "id": "c1779447344480",
+      "parentId": "c1779446961807"
+    },
+    {
+      "name": "Parasympathomimétiques directs",
+      "id": "c1779460681808",
+      "parentId": null
+    },
+    {
+      "name": "parasympathomimétiques indirects",
+      "id": "c1779460694882",
+      "parentId": null
+    },
+    {
+      "name": "anti-muscariniques",
+      "id": "c1779460703521",
+      "parentId": null
+    },
+    {
+      "name": "Esters de choline",
+      "id": "c1779460766234",
+      "parentId": "c1779460681808"
+    },
+    {
+      "name": "Alcaloides naturels",
+      "id": "c1779460790164",
+      "parentId": "c1779460681808"
+    },
+    {
+      "name": "Analogues synthéthiques",
+      "id": "c1779460798995",
+      "parentId": "c1779460681808"
+    }
+  ],
+  "words": [
+    {
+      "text": "phénylnéphrine naphazoline métaraminol",
+      "catIds": [
+        "c1779445679228"
+      ],
+      "id": "w1779445726861",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Tyramine éphédrine amphétamine",
+      "catIds": [
+        "c1779445786150"
+      ],
+      "id": "w1779445751046",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Cocaine atnidépresseurs imipraminiques",
+      "catIds": [
+        "c1779445812023"
+      ],
+      "id": "w1779445849296",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "IMAO",
+      "catIds": [
+        "c1779445812023"
+      ],
+      "id": "w1779445860535",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "L-Dopa",
+      "catIds": [
+        "c1779445794527"
+      ],
+      "id": "w1779445869976",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Alphaméthyldopamine",
+      "catIds": [
+        "c1779446064020"
+      ],
+      "id": "w1779446080284",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Réserpine",
+      "catIds": [
+        "c1779446173838"
+      ],
+      "id": "w1779446186950",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Guanethédine",
+      "catIds": [
+        "c1779446344386"
+      ],
+      "id": "w1779446364570",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Cloinidine",
+      "catIds": [
+        "c1779446344386"
+      ],
+      "id": "w1779446371091",
+      "starred": true,
+      "note": "Attention à l'arret brutale de son traitement qui peut provoquer des crises hypertensives\n"
+    },
+    {
+      "text": "Dobutamine",
+      "catIds": [
+        "c1779446826343"
+      ],
+      "id": "w1779446831533",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Salbutamol",
+      "catIds": [
+        "c1779446826343"
+      ],
+      "id": "w1779446835348",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Isoprénaline",
+      "catIds": [
+        "c1779446826343"
+      ],
+      "id": "w1779446847013",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Adrénaline",
+      "catIds": [
+        "c1779446909358"
+      ],
+      "id": "w1779446915655",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Dopamine",
+      "catIds": [
+        "c1779446909358"
+      ],
+      "id": "w1779446918702",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "prazosine",
+      "catIds": [
+        "c1779447338656"
+      ],
+      "id": "w1779447367920",
+      "starred": true,
+      "note": "HTA , Raynaud , phéochromocytome, insuff cardiaque\n"
+    },
+    {
+      "text": "alfuzosine-dxazosine",
+      "catIds": [
+        "c1779447338656"
+      ],
+      "id": "w1779447437138",
+      "starred": true,
+      "note": "trt rétention urinaire prostatique\n"
+    },
+    {
+      "text": "muscarine PILOCARPINE aréoline",
+      "catIds": [
+        "c1779460790164"
+      ],
+      "id": "w1779460825460",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Métacholine",
+      "catIds": [
+        "c1779460766234"
+      ],
+      "id": "w1779460838603",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Béthanécole",
+      "catIds": [
+        "c1779460766234"
+      ],
+      "id": "w1779460842204",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Carbachol",
+      "catIds": [
+        "c1779460766234"
+      ],
+      "id": "w1779460862997",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Acéclidine",
+      "catIds": [
+        "c1779460798995"
+      ],
+      "id": "w1779460884581",
+      "starred": false,
+      "note": ""
+    }
+  ],
+  "schemaPoints": [],
+  "schemaImageDataUrl": null,
+  "refParams": [],
+  "treeTraits": [],
+  "treeEntities": [],
+  "treeValues": [],
+  "savedAt": "22/05/2026 15:42",
+  "version": 6
+}

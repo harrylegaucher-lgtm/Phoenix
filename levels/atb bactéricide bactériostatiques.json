@@ -1,0 +1,30 @@
+{
+  "name": "ATB Bactériostatiques vs Bactéricides",
+  "savedAt": "21/05/2026 00:00",
+  "version": 6,
+  "cats": [
+    { "id": "cat_static", "name": "ATB Bactériostatiques", "parentId": null },
+    { "id": "cat_cide",   "name": "ATB Bactéricides",      "parentId": null }
+  ],
+  "words": [
+    { "id": "w1",  "text": "Chloramphénicol et dérivés",       "catIds": ["cat_static"], "starred": false, "note": "" },
+    { "id": "w2",  "text": "Cyclines (tétracyclines)",          "catIds": ["cat_static"], "starred": false, "note": "" },
+    { "id": "w3",  "text": "Macrolides",                        "catIds": ["cat_static"], "starred": false, "note": "" },
+    { "id": "w4",  "text": "Sulfamides",                        "catIds": ["cat_static"], "starred": false, "note": "" },
+    { "id": "w5",  "text": "Acide fusidique",                   "catIds": ["cat_static"], "starred": false, "note": "" },
+    { "id": "w6",  "text": "Bétalactamines",                    "catIds": ["cat_cide"],   "starred": false, "note": "" },
+    { "id": "w7",  "text": "Aminosides (aminoglycosides)",      "catIds": ["cat_cide"],   "starred": false, "note": "" },
+    { "id": "w8",  "text": "Polypeptides (polymyxines)",        "catIds": ["cat_cide"],   "starred": false, "note": "" },
+    { "id": "w9",  "text": "Imidazolés",                        "catIds": ["cat_cide"],   "starred": false, "note": "" },
+    { "id": "w10", "text": "Quinolones",                        "catIds": ["cat_cide"],   "starred": false, "note": "" },
+    { "id": "w11", "text": "Rifamycines",                       "catIds": ["cat_cide"],   "starred": false, "note": "" },
+    { "id": "w12", "text": "Glycopeptides",                     "catIds": ["cat_cide"],   "starred": false, "note": "" },
+    { "id": "w13", "text": "Fosfomycine",                       "catIds": ["cat_cide"],   "starred": false, "note": "" }
+  ],
+  "schemaPoints": [],
+  "schemaImageDataUrl": null,
+  "refParams": [],
+  "treeTraits": [],
+  "treeEntities": [],
+  "treeValues": []
+}
