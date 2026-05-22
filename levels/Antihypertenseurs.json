@@ -1,0 +1,150 @@
+{
+  "name": "Antihypertenseurs",
+  "cats": [
+    {
+      "name": "Diruétique",
+      "id": "c1779176593385",
+      "parentId": null
+    },
+    {
+      "name": "B-Bloquants",
+      "id": "c1779176598752",
+      "parentId": null
+    },
+    {
+      "name": "a-Bloquants",
+      "id": "c1779176602208",
+      "parentId": null
+    },
+    {
+      "name": "IEC",
+      "id": "c1779176606152",
+      "parentId": null
+    },
+    {
+      "name": "Inhib Claciques",
+      "id": "c1779176609856",
+      "parentId": null
+    },
+    {
+      "name": "ARAA2",
+      "id": "c1779176623153",
+      "parentId": null
+    },
+    {
+      "name": "Anse",
+      "id": "c1779176629689",
+      "parentId": "c1779176593385"
+    },
+    {
+      "name": "Thiazidiques",
+      "id": "c1779176637281",
+      "parentId": "c1779176593385"
+    },
+    {
+      "name": "Distaux (épargneurs potassqieus)",
+      "id": "c1779176655827",
+      "parentId": "c1779176593385"
+    }
+  ],
+  "words": [
+    {
+      "text": "HydroChloroThiazide",
+      "catIds": [
+        "c1779176637281"
+      ],
+      "id": "w1779176668138",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Furosémide",
+      "catIds": [
+        "c1779176629689"
+      ],
+      "id": "w1779176673419",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Spironolactone",
+      "catIds": [
+        "c1779176655827"
+      ],
+      "id": "w1779176680515",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Amiloride",
+      "catIds": [
+        "c1779176655827"
+      ],
+      "id": "w1779176682451",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Labetalol",
+      "catIds": [
+        "c1779176598752"
+      ],
+      "id": "w1779176690187",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Prazosine",
+      "catIds": [
+        "c1779176602208"
+      ],
+      "id": "w1779176693540",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Urapidil",
+      "catIds": [
+        "c1779176602208"
+      ],
+      "id": "w1779176708204",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Pril",
+      "catIds": [
+        "c1779176606152"
+      ],
+      "id": "w1779176712380",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Ipine",
+      "catIds": [
+        "c1779176609856"
+      ],
+      "id": "w1779176716541",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Sartan",
+      "catIds": [
+        "c1779176623153"
+      ],
+      "id": "w1779176731909",
+      "starred": false,
+      "note": ""
+    }
+  ],
+  "schemaPoints": [],
+  "schemaImageDataUrl": null,
+  "refParams": [],
+  "treeTraits": [],
+  "treeEntities": [],
+  "treeValues": [],
+  "savedAt": "19/05/2026 08:46",
+  "version": 6
+}
