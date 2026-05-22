@@ -391,6 +391,24 @@
     main { padding: 20px 16px 80px; }
   }
 
+
+  /* Levels modal */
+  .levels-list { display:flex; flex-direction:column; gap:8px; max-height:340px; overflow-y:auto; margin-bottom:16px; }
+  .level-item { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:var(--radius-sm); border:1.5px solid var(--border); background:var(--surface2); cursor:pointer; transition:all .15s; }
+  .level-item:hover { border-color:var(--accent); background:var(--accent-light); transform:translateX(3px); }
+  .level-icon { font-size:20px; flex-shrink:0; }
+  .level-info { flex:1; min-width:0; }
+  .level-name { font-family:var(--font-display); font-size:13px; font-weight:600; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .level-meta { font-size:11px; color:var(--ink3); margin-top:2px; }
+  .levels-empty { font-size:13px; color:var(--ink3); text-align:center; padding:24px 0; }
+  .levels-loading { display:flex; align-items:center; justify-content:center; gap:10px; padding:24px 0; font-size:13px; color:var(--ink2); }
+  .levels-spinner { width:18px; height:18px; border:2px solid var(--border-strong); border-top-color:var(--accent); border-radius:50%; animation:spin .7s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .repo-config { font-size:11px; color:var(--ink3); margin-bottom:12px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .repo-config input { flex:1; min-width:160px; height:28px; border:1px solid var(--border-strong); border-radius:var(--radius-sm); padding:0 8px; font-size:11px; font-family:var(--font-body); outline:none; }
+  .repo-config input:focus { border-color:var(--accent); }
+  .repo-config button { height:28px; padding:0 10px; font-size:11px; }
+
   @keyframes pop{0%{transform:scale(.85);opacity:0}60%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
   .pop{animation:pop .22s ease forwards;}
 </style>
@@ -411,6 +429,7 @@
     <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="importFromFile(event)" />
   </label>
   <button class="sbbtn sbbtn-new" onclick="newSession()">✦ Nouveau</button>
+  <button class="sbbtn" onclick="openLevelsModal()" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.15);">📚 Levels</button>
   <span class="cur-label" id="current-save-label"></span>
 </div>
 
@@ -434,6 +453,23 @@
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('new-modal')">Annuler</button>
       <button class="btn btn-primary" onclick="confirmNew()">Oui, nouveau</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEVELS MODAL -->
+<div class="modal-overlay" id="levels-modal">
+  <div class="modal" style="width:480px;">
+    <div class="modal-title">📚 Mes Levels</div>
+    <div class="repo-config">
+      <span>Repo GitHub :</span>
+      <input type="text" id="repo-input" placeholder="utilisateur/nom-repo" />
+      <button class="btn btn-ghost" onclick="saveRepoConfig()" style="height:28px;font-size:11px;padding:0 10px;">OK</button>
+    </div>
+    <div id="levels-list-wrap"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('levels-modal')">Fermer</button>
+      <button class="btn btn-ghost" onclick="refreshLevels()" style="font-size:12px;">🔄 Actualiser</button>
     </div>
   </div>
 </div>
@@ -2416,6 +2452,115 @@ function renderTreeNotes() {
 function resetTreePlay(){ initTreePlay(); }
 
 
+
+
+// ── LEVELS SYSTEM ────────────────────────────────────────────────────────
+const REPO_KEY = 'phoenix_repo';
+let repoPath = localStorage.getItem(REPO_KEY) || '';
+
+function openLevelsModal() {
+  document.getElementById('repo-input').value = repoPath;
+  document.getElementById('levels-modal').classList.add('open');
+  if(repoPath) loadLevels();
+  else showLevelsEmpty('Configurez votre repo GitHub ci-dessus.');
+}
+
+function saveRepoConfig() {
+  const val = document.getElementById('repo-input').value.trim();
+  if(!val) return;
+  repoPath = val;
+  localStorage.setItem(REPO_KEY, repoPath);
+  loadLevels();
+}
+
+function showLevelsLoading() {
+  document.getElementById('levels-list-wrap').innerHTML =
+    '<div class="levels-loading"><div class="levels-spinner"></div>Chargement...</div>';
+}
+
+function showLevelsEmpty(msg) {
+  document.getElementById('levels-list-wrap').innerHTML =
+    `<div class="levels-empty">${msg}</div>`;
+}
+
+async function loadLevels() {
+  if(!repoPath) { showLevelsEmpty('Configurez votre repo GitHub ci-dessus.'); return; }
+  showLevelsLoading();
+  try {
+    // GitHub Contents API — no auth needed for public repos
+    const url = `https://api.github.com/repos/${repoPath}/contents/levels`;
+    const res = await fetch(url, { headers:{ 'Accept':'application/vnd.github.v3+json' } });
+    if(!res.ok) {
+      if(res.status===404) showLevelsEmpty('Dossier "levels/" introuvable dans ce repo. Créez-le et ajoutez vos .json.');
+      else showLevelsEmpty(`Erreur ${res.status} — vérifiez le nom du repo.`);
+      return;
+    }
+    const files = await res.json();
+    const jsonFiles = files.filter(f => f.name.endsWith('.json'));
+    if(!jsonFiles.length) { showLevelsEmpty("Aucun fichier .json dans levels/ pour l'instant."); return; }
+    renderLevelsList(jsonFiles);
+  } catch(e) {
+    showLevelsEmpty('Impossible de contacter GitHub. Vérifiez votre connexion.');
+  }
+}
+
+function refreshLevels() { loadLevels(); }
+
+function renderLevelsList(files) {
+  const wrap = document.getElementById('levels-list-wrap');
+  wrap.innerHTML = '';
+  const list = document.createElement('div'); list.className='levels-list';
+  files.forEach(f => {
+    const name = f.name.replace('.json','').replace(/_/g,' ');
+    const item = document.createElement('div'); item.className='level-item';
+    item.innerHTML = `
+      <span class="level-icon">📄</span>
+      <div class="level-info">
+        <div class="level-name">${name}</div>
+        <div class="level-meta">${(f.size/1024).toFixed(1)} KB</div>
+      </div>
+      <span style="font-size:11px;color:var(--accent);font-family:var(--font-display);font-weight:700;">Charger →</span>
+    `;
+    item.addEventListener('click', () => loadLevelFile(f.download_url, name));
+    list.appendChild(item);
+  });
+  wrap.appendChild(list);
+}
+
+async function loadLevelFile(url, name) {
+  const wrap = document.getElementById('levels-list-wrap');
+  wrap.innerHTML = '<div class="levels-loading"><div class="levels-spinner"></div>Chargement du level...</div>';
+  try {
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('fetch failed');
+    const data = await res.json();
+    // Same logic as importFromFile
+    cats = data.cats||[];
+    words = data.words||[];
+    refParams = data.refParams||[];
+    treeTraits = data.treeTraits||[];
+    treeValues = data.treeValues||[];
+    treeEntities = (data.treeEntities||[]).map(e=>e.names?e:{...e,names:[e.name||'?']});
+    schemaPoints = data.schemaPoints||[];
+    schemaImageDataUrl = data.schemaImageDataUrl||null;
+    selectedCatIdx = cats.length>0?0:null;
+    history = [];
+    currentSaveName = data.name||name;
+    updateCurrentLabel(currentSaveName);
+    renderSetup(); updateIndicator(); updateUndo();
+    if(schemaImageDataUrl){
+      document.getElementById('schema-img').src=schemaImageDataUrl;
+      document.getElementById('schema-no-image').style.display='none';
+      document.getElementById('schema-editor').style.display='block';
+      renderSchemaPoints();
+    }
+    setPhase('setup'); switchMode('classify');
+    closeModal('levels-modal');
+    showToast(`"${currentSaveName}" chargé !`);
+  } catch(e) {
+    showLevelsEmpty('Erreur lors du chargement du fichier. Réessayez.');
+  }
+}
 
 // ── PWA SERVICE WORKER ───────────────────────────────────────────────────
 if('serviceWorker' in navigator) {
