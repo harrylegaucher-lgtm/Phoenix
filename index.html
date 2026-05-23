@@ -409,6 +409,36 @@
   .repo-config input:focus { border-color:var(--accent); }
   .repo-config button { height:28px; padding:0 10px; font-size:11px; }
 
+
+  /* Enhanced score panel */
+  .score-panel { background:var(--surface); border-radius:var(--radius); border:1.5px solid var(--border); box-shadow:var(--shadow); margin-top:20px; overflow:hidden; }
+  .score-panel-main { display:flex; align-items:center; gap:0; }
+  .score-stat { flex:1; padding:16px 18px; text-align:center; border-right:1px solid var(--border); }
+  .score-stat:last-child { border-right:none; }
+  .score-stat-val { font-family:var(--font-display); font-size:28px; font-weight:800; line-height:1; }
+  .score-stat-lbl { font-size:10px; text-transform:uppercase; letter-spacing:.7px; color:var(--ink3); margin-top:4px; font-family:var(--font-display); font-weight:600; }
+  .score-stat.correct .score-stat-val { color:#1a7a58; }
+  .score-stat.errors  .score-stat-val { color:var(--accent); }
+  .score-stat.pct     .score-stat-val { color:var(--ink); }
+  .score-stat.timer   .score-stat-val { color:var(--ink2); font-size:20px; }
+  .score-panel-bar { height:5px; background:var(--surface2); }
+  .score-panel-bar-fill { height:100%; background:linear-gradient(90deg,#1a7a58,#4CAF50); transition:width .6s cubic-bezier(.4,0,.2,1); width:0%; }
+
+  /* History modal */
+  .history-list { display:flex; flex-direction:column; gap:8px; max-height:400px; overflow-y:auto; margin-bottom:16px; }
+  .history-item { padding:12px 14px; border-radius:var(--radius-sm); border:1.5px solid var(--border); background:var(--surface2); }
+  .history-item-top { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .history-mode-badge { font-size:10px; font-weight:700; padding:2px 8px; border-radius:99px; font-family:var(--font-display); }
+  .history-deck { font-family:var(--font-display); font-size:13px; font-weight:600; color:var(--ink); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .history-date { font-size:11px; color:var(--ink3); white-space:nowrap; }
+  .history-stats { display:flex; gap:12px; font-size:12px; }
+  .history-stat { display:flex; align-items:center; gap:4px; color:var(--ink2); }
+  .history-stat strong { font-family:var(--font-display); font-weight:700; }
+  .history-stat.ok strong { color:#1a7a58; }
+  .history-stat.err strong { color:var(--accent); }
+  .history-stat.pct strong { color:var(--ink); }
+  .history-empty { font-size:13px; color:var(--ink3); text-align:center; padding:24px 0; }
+
   @keyframes pop{0%{transform:scale(.85);opacity:0}60%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
   .pop{animation:pop .22s ease forwards;}
 </style>
@@ -430,6 +460,7 @@
   </label>
   <button class="sbbtn sbbtn-new" onclick="newSession()">✦ Nouveau</button>
   <button class="sbbtn" onclick="openLevelsModal()" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.15);">📚 Levels</button>
+  <button class="sbbtn" onclick="openHistoryModal()" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.15);">🏆 Historique</button>
   <span class="cur-label" id="current-save-label"></span>
 </div>
 
@@ -453,6 +484,18 @@
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('new-modal')">Annuler</button>
       <button class="btn btn-primary" onclick="confirmNew()">Oui, nouveau</button>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY MODAL -->
+<div class="modal-overlay" id="history-modal">
+  <div class="modal" style="width:520px;">
+    <div class="modal-title">🏆 Historique des sessions</div>
+    <div class="history-list" id="history-list"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="clearHistory()" style="color:var(--accent);font-size:12px;">🗑 Effacer</button>
+      <button class="btn btn-ghost" onclick="closeModal('history-modal')">Fermer</button>
     </div>
   </div>
 </div>
@@ -558,12 +601,18 @@
       </div>
       <div id="word-pool"></div>
       <div class="sandbox" id="sandbox-play"></div>
-      <div class="score-row">
-        <span class="score-big" id="score">0</span>
-        <span class="score-label">/ <span id="total">0</span> mots<br>placés correctement</span>
+      <div class="score-panel" id="classify-score-panel">
+        <div class="score-panel-main">
+          <div class="score-stat correct"><div class="score-stat-val" id="score">0</div><div class="score-stat-lbl">Corrects</div></div>
+          <div class="score-stat errors"><div class="score-stat-val" id="classify-errors">0</div><div class="score-stat-lbl">Erreurs</div></div>
+          <div class="score-stat pct"><div class="score-stat-val" id="classify-pct">—</div><div class="score-stat-lbl">Score</div></div>
+          <div class="score-stat timer"><div class="score-stat-val" id="classify-timer">0:00</div><div class="score-stat-lbl">Temps</div></div>
+        </div>
+        <div class="score-panel-bar"><div class="score-panel-bar-fill" id="classify-bar"></div></div>
       </div>
-      <div id="feedback"></div>
-      <div style="margin-top:16px;"><button class="btn btn-ghost" onclick="resetPlay()">Recommencer</button></div>
+      <div id="feedback" style="font-size:13px;margin-top:12px;font-weight:500;min-height:20px;padding:0 4px;"></div>
+      <div style="margin-top:16px;display:flex;gap:10px;"><button class="btn btn-ghost" onclick="resetPlay()">Recommencer</button></div>
+      <input type="hidden" id="total" value="0" />
     </div>
   </div>
 
@@ -628,12 +677,18 @@
       <div class="schema-play-wrap" id="schema-play-wrap">
         <img id="schema-play-img" src="" alt="Schéma" />
       </div>
-      <div class="score-row" style="margin-top:16px;">
-        <span class="score-big" id="schema-score">0</span>
-        <span class="score-label">/ <span id="schema-total">0</span> mots<br>placés correctement</span>
+      <div class="score-panel" style="margin-top:16px;">
+        <div class="score-panel-main">
+          <div class="score-stat correct"><div class="score-stat-val" id="schema-score">0</div><div class="score-stat-lbl">Corrects</div></div>
+          <div class="score-stat errors"><div class="score-stat-val" id="schema-errors">0</div><div class="score-stat-lbl">Erreurs</div></div>
+          <div class="score-stat pct"><div class="score-stat-val" id="schema-pct">—</div><div class="score-stat-lbl">Score</div></div>
+          <div class="score-stat timer"><div class="score-stat-val" id="schema-timer">0:00</div><div class="score-stat-lbl">Temps</div></div>
+        </div>
+        <div class="score-panel-bar"><div class="score-panel-bar-fill" id="schema-bar"></div></div>
       </div>
       <div id="schema-feedback" style="font-size:13px;margin-top:12px;font-weight:500;min-height:20px;padding:0 4px;"></div>
       <div style="margin-top:16px;"><button class="btn btn-ghost" onclick="resetSchemaPlay()">Recommencer</button></div>
+      <input type="hidden" id="schema-total" value="0" />
     </div>
   </div>
 
@@ -684,11 +739,17 @@
         <button class="btn btn-ghost" onclick="resetRefPlay()">Recommencer</button>
         <span class="ref-tol-note">Tolérance : ±5% de la valeur correcte</span>
       </div>
-      <div class="score-row" style="margin-top:16px;">
-        <span class="score-big" id="ref-score">0</span>
-        <span class="score-label">/ <span id="ref-total">0</span> champs<br>corrects</span>
+      <div class="score-panel" style="margin-top:16px;">
+        <div class="score-panel-main">
+          <div class="score-stat correct"><div class="score-stat-val" id="ref-score">0</div><div class="score-stat-lbl">Corrects</div></div>
+          <div class="score-stat errors"><div class="score-stat-val" id="ref-errors">0</div><div class="score-stat-lbl">Erreurs</div></div>
+          <div class="score-stat pct"><div class="score-stat-val" id="ref-pct">—</div><div class="score-stat-lbl">Score</div></div>
+          <div class="score-stat timer"><div class="score-stat-val" id="ref-timer">0:00</div><div class="score-stat-lbl">Temps</div></div>
+        </div>
+        <div class="score-panel-bar"><div class="score-panel-bar-fill" id="ref-bar"></div></div>
       </div>
       <div id="ref-feedback" style="font-size:13px;margin-top:10px;font-weight:500;min-height:18px;"></div>
+      <input type="hidden" id="ref-total" value="0" />
     </div>
   </div>
 
@@ -734,12 +795,18 @@
         Chaque section contient les valeurs d'un trait mélangées entre toutes les entités. Glissez chaque valeur vers la bonne entité.
       </div>
       <div id="tree-play-sections"></div>
-      <div class="score-row" style="margin-top:20px;">
-        <span class="score-big" id="tree-score">0</span>
-        <span class="score-label">/ <span id="tree-total">0</span> valeurs<br>correctement placées</span>
+      <div class="score-panel" style="margin-top:20px;">
+        <div class="score-panel-main">
+          <div class="score-stat correct"><div class="score-stat-val" id="tree-score">0</div><div class="score-stat-lbl">Corrects</div></div>
+          <div class="score-stat errors"><div class="score-stat-val" id="tree-errors">0</div><div class="score-stat-lbl">Erreurs</div></div>
+          <div class="score-stat pct"><div class="score-stat-val" id="tree-pct">—</div><div class="score-stat-lbl">Score</div></div>
+          <div class="score-stat timer"><div class="score-stat-val" id="tree-timer">0:00</div><div class="score-stat-lbl">Temps</div></div>
+        </div>
+        <div class="score-panel-bar"><div class="score-panel-bar-fill" id="tree-bar"></div></div>
       </div>
       <div id="tree-feedback" style="font-size:13px;margin-top:10px;font-weight:500;min-height:18px;"></div>
       <div style="margin-top:14px;"><button class="btn btn-ghost" onclick="resetTreePlay()">Recommencer</button></div>
+      <input type="hidden" id="tree-total" value="0" />
     </div>
   </div>
 
@@ -1258,12 +1325,15 @@ function deCluster(arr){
   return result;
 }
 function initPlay() {
+  startScoreTimer('classify');
   let score=0;
   const pool = document.getElementById('word-pool');
   const playArea = document.getElementById('sandbox-play');
   pool.innerHTML=''; playArea.innerHTML='';
   document.getElementById('feedback').textContent='';
   document.getElementById('score').textContent='0';
+  document.getElementById('classify-errors').textContent='0';
+  document.getElementById('classify-pct').textContent='—';
 
   // ONE chip per unique word — tracks remaining placements internally
   const remainingPlacements={};
@@ -1272,7 +1342,7 @@ function initPlay() {
     remainingPlacements[w.id]=new Set(w.catIds||[]);
     totalSlots+=(w.catIds||[]).length;
   });
-  document.getElementById('total').textContent=totalSlots;
+  document.getElementById('total').value=totalSlots; setTotal('classify',totalSlots);
 
   // ONE chip per word (not per catId)
   const uniqueChips = words.map(w=>({ chipId:'chip_'+w.id, wordId:w.id, text:w.text }));
@@ -1339,10 +1409,12 @@ function initPlay() {
         showFeedback(`Bien joué ! "${word.text}" appartient à "${cat.name}" !`,'ok');
         // Return chip OR remove if fully placed
         returnOrRemoveChip(chipData);
+        // Save history when session complete
+        if(score === scoreState['classify'].total) { stopScoreTimer('classify'); saveSessionToHistory('classify'); }
       } else {
         placed.style.cssText=`background:#fde8e8;border-color:#d44d4d;color:#7a1a1a;`;
         chipsDiv.appendChild(placed); src.remove();
-        showFeedback(`"${word.text}" n'appartient pas à "${cat.name}". Réessayez !`,'err');
+        showFeedback(`"${word.text}" n'appartient pas à "${cat.name}". Réessayez !`,'err'); recordError('classify');
         setTimeout(()=>{placed.remove(); pool.appendChild(makePoolChip(chipData));},1300);
       }
     });
@@ -1548,8 +1620,11 @@ function deleteSelectedPoint() {
 // =====================================================
 function initSchemaPlay() {
   if (!schemaImageDataUrl) { alert('Importez d\'abord une image en Phase 1 !'); setSchemaPhase('setup'); return; }
+  startScoreTimer('schema');
   schemaScore = 0;
   document.getElementById('schema-score').textContent='0';
+  document.getElementById('schema-errors').textContent='0';
+  document.getElementById('schema-pct').textContent='—';
   document.getElementById('schema-feedback').textContent='';
 
   // Load image
@@ -1637,7 +1712,7 @@ function initSchemaPlay() {
         if(remaining[pt.id].length===0) dot.classList.add('done');
       } else {
         placed.appendChild(tag); src.remove();
-        setSchemaFeedback(`✗ "${slot.word}" n'appartient pas à ce point. Réessayez !`,'err');
+        setSchemaFeedback(`✗ "${slot.word}" n'appartient pas à ce point. Réessayez !`,'err'); recordError('schema');
         setTimeout(()=>{
           tag.remove();
           const rc=document.createElement('span');
@@ -1953,7 +2028,8 @@ function makeRefChip(v) {
 }
 
 function validateRef() {
-  let correct=0, total=0;
+  stopScoreTimer('ref');
+  let correct=0, total=0, errors=0;
   const rows = document.querySelectorAll('.ref-play-row');
   rows.forEach(row=>{
     const paramId = row.dataset.paramId;
@@ -1974,10 +2050,10 @@ function validateRef() {
     const maxOk = checkField(maxInp, p.max);
 
     if(minOk) { minInp.style.borderColor='#1a7a58'; minInp.style.background='#f0fdf7'; correct++; }
-    else if(minInp.value!=='') { minInp.style.borderColor='#d44d4d'; minInp.style.background='#fdf0f0'; }
+    else if(minInp.value!=='') { minInp.style.borderColor='#d44d4d'; minInp.style.background='#fdf0f0'; errors++; }
 
     if(maxOk) { maxInp.style.borderColor='#1a7a58'; maxInp.style.background='#f0fdf7'; correct++; }
-    else if(maxInp.value!=='') { maxInp.style.borderColor='#d44d4d'; maxInp.style.background='#fdf0f0'; }
+    else if(maxInp.value!=='') { maxInp.style.borderColor='#d44d4d'; maxInp.style.background='#fdf0f0'; errors++; }
 
     if(minOk && maxOk){ row.className='ref-play-row correct'; status.textContent='✓'; }
     else if(!minOk && !maxOk && minInp.value==='' && maxInp.value===''){ row.className='ref-play-row'; status.textContent=''; }
@@ -1985,7 +2061,11 @@ function validateRef() {
   });
 
   document.getElementById('ref-score').textContent=correct;
-  document.getElementById('ref-total').textContent=total;
+  document.getElementById('ref-total').value=total;
+  document.getElementById('ref-errors').textContent=errors;
+  scoreState['ref'].correct=correct; scoreState['ref'].errors=errors; scoreState['ref'].total=total;
+  updateScoreDisplay('ref');
+  saveSessionToHistory('ref');
   const fb=document.getElementById('ref-feedback');
   if(correct===total && total>0){
     fb.textContent='🎉 Parfait ! Toutes les valeurs sont correctes !'; fb.className='fb-ok';
@@ -2214,10 +2294,14 @@ document.addEventListener('click', ()=>closeCellEditor());
 
 // ── PLAY ───────────────────────────────────────────────────────────────────
 function initTreePlay() {
+  startScoreTimer('tree');
   let treeScore = 0;
   document.getElementById('tree-score').textContent='0';
+  document.getElementById('tree-errors').textContent='0';
+  document.getElementById('tree-pct').textContent='—';
   document.getElementById('tree-feedback').textContent='';
-  document.getElementById('tree-total').textContent = treeValues.length;
+  document.getElementById('tree-total').value = treeValues.length;
+  setTotal('tree', treeValues.length);
 
   // remainingPlacements[entityId][traitId] = Set of value-texts still needed
   // This allows interchangeable chips: a chip "Kyste" is correct in any entity
@@ -2231,15 +2315,29 @@ function initTreePlay() {
     });
   });
 
-  // Build one chip per treeValue entry (unique id per slot)
-  // chipPool: { chipId, value, traitId } — chip carries value+trait, NOT entityId
-  let chipCounter = 0;
-  const chipPool = treeValues.map(v => ({
-    chipId: 'tc_' + (chipCounter++),
-    value: v.value,
-    traitId: v.traitId,
-    origValId: v.id  // kept for reference only
-  }));
+  // ONE chip per unique (value, traitId) pair — not one per treeValue entry.
+  // It stays in the pool until ALL entities that need it have received it.
+  const uniqueChips = [];
+  treeTraits.forEach(t => {
+    const valuesForTrait = [...new Set(treeValues.filter(v=>v.traitId===t.id).map(v=>v.value))];
+    valuesForTrait.forEach(val => {
+      uniqueChips.push({ chipId:'tc_'+t.id+'_'+val.replace(/\s/g,'_'), value:val, traitId:t.id });
+    });
+  });
+  const chipPool = uniqueChips; // alias for drop handler references
+
+  // Count total placements needed (still = treeValues.length for score)
+  document.getElementById('tree-total').textContent = treeValues.length;
+
+  // returnOrRemoveChip: put chip back in pool if still needed, else remove it
+  const returnOrRemoveChip = (chip, poolEl, col) => {
+    // Check if any entity still needs this value for this trait
+    const stillNeeded = treeEntities.some(en =>
+      (remainingPlacements[en.id]?.[chip.traitId]||[]).includes(chip.value)
+    );
+    if(stillNeeded) poolEl.appendChild(makeTreeChip(chip, col));
+    // else chip disappears — all its placements are done
+  };
 
   const sections = document.getElementById('tree-play-sections'); sections.innerHTML='';
   const shuffledTraits = fisherYates([...treeTraits]);
@@ -2309,8 +2407,10 @@ function initTreePlay() {
             setTreeFeedback(`"${chip.value}" remis dans la liste.`,'info');
           });
           dropZone.appendChild(placed); src.remove();
-          treeScore++; document.getElementById('tree-score').textContent=treeScore;
+          treeScore++; document.getElementById('tree-score').textContent=treeScore; recordCorrect('tree'); if(treeScore===scoreState['tree'].total){stopScoreTimer('tree');saveSessionToHistory('tree');}
           setTreeFeedback(`✓ "${chip.value}" appartient bien à ${entityPrimaryName(entity)} !`,'ok');
+          // Return chip to pool only if other entities still need it, else it disappears
+          returnOrRemoveChip(chip, poolEl, col);
         } else {
           dropZone.appendChild(placed); src.remove();
           // Find which entity expects this value
@@ -2318,7 +2418,7 @@ function initTreePlay() {
             (remainingPlacements[en.id]?.[trait.id]||[]).includes(chip.value)
           );
           const hint = correctEntity ? ` → attendu dans "${entityPrimaryName(correctEntity)}"` : '';
-          setTreeFeedback(`✗ "${chip.value}" n'appartient pas à "${entityPrimaryName(entity)}"${hint}.`,'err');
+          setTreeFeedback(`✗ "${chip.value}" n'appartient pas à "${entityPrimaryName(entity)}"${hint}.`,'err'); recordError('tree');
           setTimeout(()=>{ placed.remove(); poolEl.appendChild(makeTreeChip(chip, col)); },1500);
         }
       });
@@ -2452,6 +2552,137 @@ function renderTreeNotes() {
 function resetTreePlay(){ initTreePlay(); }
 
 
+
+
+
+// ── SCORE ENGINE ──────────────────────────────────────────────────────────
+const HISTORY_KEY = 'phoenix_history';
+const MODE_COLORS = {
+  classify: { bg:'#EBF3FF', color:'#1a4a7a', label:'Classification' },
+  schema:   { bg:'#E9F8EF', color:'#145c35', label:'Schéma' },
+  ref:      { bg:'#FDE8F2', color:'#7a1a47', label:'Référence' },
+  tree:     { bg:'#F0ECFF', color:'#3b1f8c', label:'Arbre' },
+};
+
+// Per-mode state
+const scoreState = {};
+['classify','schema','ref','tree'].forEach(m => {
+  scoreState[m] = { correct:0, errors:0, total:0, startTime:null, timerInterval:null };
+});
+
+function startScoreTimer(mode) {
+  const s = scoreState[mode];
+  s.correct=0; s.errors=0; s.total=0;
+  s.startTime = Date.now();
+  clearInterval(s.timerInterval);
+  s.timerInterval = setInterval(()=>updateTimerDisplay(mode), 1000);
+}
+
+function stopScoreTimer(mode) {
+  clearInterval(scoreState[mode].timerInterval);
+}
+
+function updateTimerDisplay(mode) {
+  const elapsed = Math.floor((Date.now() - (scoreState[mode].startTime||Date.now())) / 1000);
+  const m = Math.floor(elapsed/60), s = elapsed%60;
+  const id = mode+'-timer';
+  const el = document.getElementById(id); if(el) el.textContent = m+':'+(s<10?'0':'')+s;
+}
+
+function recordCorrect(mode) {
+  const s = scoreState[mode]; s.correct++;
+  updateScoreDisplay(mode);
+}
+
+function recordError(mode) {
+  const s = scoreState[mode]; s.errors++;
+  updateScoreDisplay(mode);
+}
+
+function setTotal(mode, total) {
+  scoreState[mode].total = total;
+  updateScoreDisplay(mode);
+}
+
+function updateScoreDisplay(mode) {
+  const s = scoreState[mode];
+  const errEl  = document.getElementById(mode+'-errors');
+  const pctEl  = document.getElementById(mode+'-pct');
+  const barEl  = document.getElementById(mode+'-bar');
+  if(errEl) errEl.textContent = s.errors;
+  const attempts = s.correct + s.errors;
+  const pct = attempts > 0 ? Math.round((s.correct / attempts) * 100) : null;
+  if(pctEl) pctEl.textContent = pct !== null ? pct+'%' : '—';
+  if(barEl) {
+    const prog = s.total > 0 ? (s.correct / s.total)*100 : 0;
+    barEl.style.width = Math.min(prog,100)+'%';
+    barEl.style.background = pct===null ? '#1a7a58' : pct>=80 ? '#1a7a58' : pct>=50 ? '#e08a1a' : '#d44d4d';
+  }
+}
+
+function saveSessionToHistory(mode) {
+  const s = scoreState[mode];
+  const elapsed = s.startTime ? Math.floor((Date.now()-s.startTime)/1000) : 0;
+  const attempts = s.correct + s.errors;
+  const pct = attempts > 0 ? Math.round((s.correct/attempts)*100) : 0;
+  const entry = {
+    mode, deck: currentSaveName||'Sans nom',
+    correct: s.correct, errors: s.errors, total: s.total,
+    pct, elapsed,
+    date: new Date().toLocaleDateString('fr-FR')+' '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})
+  };
+  const history = getHistory();
+  history.unshift(entry);
+  if(history.length > 30) history.pop();
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+}
+
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]'); } catch { return []; }
+}
+
+function openHistoryModal() {
+  renderHistoryList();
+  document.getElementById('history-modal').classList.add('open');
+}
+
+function renderHistoryList() {
+  const list = document.getElementById('history-list');
+  const history = getHistory();
+  if(!history.length) {
+    list.innerHTML=`<div class="history-empty">Aucune session enregistrée pour l'instant.<br>Terminez une Phase 2 pour voir vos résultats.</div>`;
+    return;
+  }
+  list.innerHTML='';
+  history.forEach(e => {
+    const mc = MODE_COLORS[e.mode]||MODE_COLORS.classify;
+    const elapsed = e.elapsed||0;
+    const mm=Math.floor(elapsed/60), ss=elapsed%60;
+    const timeStr = `${mm}'${ss<10?'0':''}${ss}"`;
+    const item = document.createElement('div'); item.className='history-item';
+    item.innerHTML=`
+      <div class="history-item-top">
+        <span class="history-mode-badge" style="background:${mc.bg};color:${mc.color};">${mc.label}</span>
+        <span class="history-deck">${e.deck}</span>
+        <span class="history-date">${e.date}</span>
+      </div>
+      <div class="history-stats">
+        <span class="history-stat ok">✓ <strong>${e.correct}</strong> corrects</span>
+        <span class="history-stat err">✗ <strong>${e.errors}</strong> erreurs</span>
+        <span class="history-stat pct">🎯 <strong>${e.pct}%</strong></span>
+        <span class="history-stat">⏱ <strong>${timeStr}</strong></span>
+        <span class="history-stat">📋 <strong>${e.total}</strong> total</span>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function clearHistory() {
+  if(!confirm("Effacer tout l'historique ?")) return;
+  localStorage.removeItem(HISTORY_KEY);
+  renderHistoryList();
+}
 
 
 // ── LEVELS SYSTEM ────────────────────────────────────────────────────────
