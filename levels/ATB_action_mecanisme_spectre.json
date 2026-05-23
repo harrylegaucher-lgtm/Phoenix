@@ -1,0 +1,86 @@
+{
+  "name": "ATB — Action, Mécanisme, Spectre",
+  "savedAt": "23/05/2026 00:00",
+  "version": 6,
+  "cats": [],
+  "words": [],
+  "schemaPoints": [],
+  "schemaImageDataUrl": null,
+  "refParams": [],
+  "treeTraits": [
+    { "id": "tr_action",    "name": "Action" },
+    { "id": "tr_mecanisme", "name": "Mécanisme" },
+    { "id": "tr_spectre",   "name": "Spectre" },
+    { "id": "tr_molecules", "name": "Molécules / exemples" }
+  ],
+  "treeEntities": [
+    { "id": "te_polypeptides",  "names": ["Polypeptides"] },
+    { "id": "te_quinofluoro1",  "names": ["Quinolones / Fluoroquinolones"] },
+    { "id": "te_blactamines",   "names": ["B-lactamines"] },
+    { "id": "te_glycopeptides", "names": ["Glycopeptides"] },
+    { "id": "te_fosfomycine",   "names": ["Fosfomycine"] },
+    { "id": "te_aminosides",    "names": ["Aminosides"] },
+    { "id": "te_acidefus",      "names": ["Acide fusidique"] },
+    { "id": "te_phenicoles",    "names": ["Phénicolés"] },
+    { "id": "te_macrolides",    "names": ["Macrolides"] },
+    { "id": "te_tetracyclines", "names": ["Tétracyclines"] },
+    { "id": "te_sulfamides",    "names": ["Sulfamides"] },
+    { "id": "te_rifamycine",    "names": ["Rifamycine"] },
+    { "id": "te_nitroimidazoles", "names": ["Nitro-imidazolés"] }
+  ],
+  "treeValues": [
+    { "id": "tv1",  "entityId": "te_polypeptides",  "traitId": "tr_action",    "value": "Bactéricide",           "starred": false, "note": "" },
+    { "id": "tv2",  "entityId": "te_polypeptides",  "traitId": "tr_mecanisme", "value": "Inhibition synthèse membrane", "starred": true, "note": "Agissent sur la membrane cytoplasmique en perturbant sa perméabilité." },
+    { "id": "tv3",  "entityId": "te_polypeptides",  "traitId": "tr_molecules", "value": "Polymyxine",            "starred": false, "note": "" },
+    { "id": "tv4",  "entityId": "te_polypeptides",  "traitId": "tr_molecules", "value": "Colistine",             "starred": false, "note": "" },
+
+    { "id": "tv5",  "entityId": "te_quinofluoro1",  "traitId": "tr_action",    "value": "Bactéricide",           "starred": false, "note": "" },
+    { "id": "tv6",  "entityId": "te_quinofluoro1",  "traitId": "tr_spectre",   "value": "Gram -",                "starred": false, "note": "" },
+    { "id": "tv7",  "entityId": "te_quinofluoro1",  "traitId": "tr_mecanisme", "value": "Inhibition synthèse acides nucléiques", "starred": true, "note": "Inhibent les ADN-gyrases et topoisomérases IV." },
+
+    { "id": "tv8",  "entityId": "te_blactamines",   "traitId": "tr_action",    "value": "Bactéricide",           "starred": false, "note": "" },
+    { "id": "tv9",  "entityId": "te_blactamines",   "traitId": "tr_mecanisme", "value": "Inhibition synthèse paroi", "starred": true, "note": "Inhibent les PLP (protéines liant la pénicilline), bloquant la synthèse du peptidoglycane." },
+    { "id": "tv10", "entityId": "te_blactamines",   "traitId": "tr_spectre",   "value": "Large",                 "starred": false, "note": "" },
+    { "id": "tv11", "entityId": "te_blactamines",   "traitId": "tr_spectre",   "value": "Pyocyanique",           "starred": true,  "note": "Certaines B-lactamines (carbapénèmes, ticarcilline) couvrent le Pseudomonas aeruginosa." },
+    { "id": "tv12", "entityId": "te_blactamines",   "traitId": "tr_molecules", "value": "Pénicilline",           "starred": false, "note": "" },
+    { "id": "tv13", "entityId": "te_blactamines",   "traitId": "tr_molecules", "value": "Carbapénème",           "starred": false, "note": "" },
+    { "id": "tv14", "entityId": "te_blactamines",   "traitId": "tr_molecules", "value": "Monobactame",           "starred": false, "note": "" },
+    { "id": "tv15", "entityId": "te_blactamines",   "traitId": "tr_molecules", "value": "Céphalosporine",        "starred": false, "note": "" },
+    { "id": "tv16", "entityId": "te_blactamines",   "traitId": "tr_molecules", "value": "Céfsulodine",           "starred": true,  "note": "Céphalosporine à spectre étroit orientée Pseudomonas." },
+
+    { "id": "tv17", "entityId": "te_glycopeptides", "traitId": "tr_action",    "value": "Bactéricide",           "starred": false, "note": "" },
+    { "id": "tv18", "entityId": "te_glycopeptides", "traitId": "tr_mecanisme", "value": "Inhibition synthèse paroi", "starred": false, "note": "" },
+    { "id": "tv19", "entityId": "te_glycopeptides", "traitId": "tr_spectre",   "value": "Gram +",                "starred": true,  "note": "Spectre étroit limité aux bactéries Gram + (ex: SARM, entérocoques)." },
+    { "id": "tv20", "entityId": "te_glycopeptides", "traitId": "tr_molecules", "value": "Vancomycine",           "starred": false, "note": "" },
+
+    { "id": "tv21", "entityId": "te_fosfomycine",   "traitId": "tr_action",    "value": "Bactéricide",           "starred": false, "note": "" },
+    { "id": "tv22", "entityId": "te_fosfomycine",   "traitId": "tr_mecanisme", "value": "Inhibition synthèse paroi", "starred": false, "note": "" },
+
+    { "id": "tv23", "entityId": "te_aminosides",    "traitId": "tr_action",    "value": "Bactéricide",           "starred": false, "note": "" },
+    { "id": "tv24", "entityId": "te_aminosides",    "traitId": "tr_mecanisme", "value": "Inhibition synthèse protéique", "starred": true, "note": "Se fixent sur la sous-unité 30S du ribosome, provoquant des erreurs de lecture de l'ARNm." },
+
+    { "id": "tv25", "entityId": "te_acidefus",      "traitId": "tr_action",    "value": "Bactériostatique",      "starred": false, "note": "" },
+    { "id": "tv26", "entityId": "te_acidefus",      "traitId": "tr_mecanisme", "value": "Inhibition synthèse protéique", "starred": false, "note": "" },
+
+    { "id": "tv27", "entityId": "te_phenicoles",    "traitId": "tr_action",    "value": "Bactériostatique",      "starred": false, "note": "" },
+    { "id": "tv28", "entityId": "te_phenicoles",    "traitId": "tr_mecanisme", "value": "Inhibition synthèse protéique", "starred": false, "note": "" },
+    { "id": "tv29", "entityId": "te_phenicoles",    "traitId": "tr_spectre",   "value": "Large",                 "starred": false, "note": "" },
+    { "id": "tv30", "entityId": "te_phenicoles",    "traitId": "tr_molecules", "value": "Chloramphénicol",       "starred": false, "note": "" },
+
+    { "id": "tv31", "entityId": "te_macrolides",    "traitId": "tr_action",    "value": "Bactériostatique",      "starred": false, "note": "" },
+    { "id": "tv32", "entityId": "te_macrolides",    "traitId": "tr_mecanisme", "value": "Inhibition synthèse protéique", "starred": false, "note": "" },
+
+    { "id": "tv33", "entityId": "te_tetracyclines", "traitId": "tr_action",    "value": "Bactériostatique",      "starred": false, "note": "" },
+    { "id": "tv34", "entityId": "te_tetracyclines", "traitId": "tr_mecanisme", "value": "Inhibition synthèse protéique", "starred": false, "note": "" },
+    { "id": "tv35", "entityId": "te_tetracyclines", "traitId": "tr_spectre",   "value": "Large",                 "starred": false, "note": "" },
+
+    { "id": "tv36", "entityId": "te_sulfamides",    "traitId": "tr_action",    "value": "Bactériostatique",      "starred": false, "note": "" },
+    { "id": "tv37", "entityId": "te_sulfamides",    "traitId": "tr_mecanisme", "value": "Inhibition synthèse acides nucléiques", "starred": true, "note": "Inhibent la dihydroptéroate synthase, bloquant la synthèse de folates nécessaires aux acides nucléiques." },
+
+    { "id": "tv38", "entityId": "te_rifamycine",    "traitId": "tr_action",    "value": "Bactéricide",           "starred": false, "note": "" },
+    { "id": "tv39", "entityId": "te_rifamycine",    "traitId": "tr_mecanisme", "value": "Inhibition synthèse acides nucléiques", "starred": true, "note": "Inhibent l'ARN polymérase ADN-dépendante bactérienne." },
+
+    { "id": "tv40", "entityId": "te_nitroimidazoles", "traitId": "tr_action",    "value": "Bactéricide",         "starred": false, "note": "" },
+    { "id": "tv41", "entityId": "te_nitroimidazoles", "traitId": "tr_mecanisme", "value": "Inhibition synthèse acides nucléiques", "starred": true, "note": "Prodrug activée en milieu anaérobie — le métabolite réduit fragmente l'ADN bactérien." }
+  ]
+}

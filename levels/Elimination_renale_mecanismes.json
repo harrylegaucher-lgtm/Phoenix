@@ -1,0 +1,51 @@
+{
+  "name": "Élimination rénale — Mécanismes",
+  "savedAt": "23/05/2026 00:00",
+  "version": 6,
+  "cats": [],
+  "words": [],
+  "schemaPoints": [],
+  "schemaImageDataUrl": null,
+  "refParams": [],
+  "treeTraits": [
+    { "id": "tr_type",      "name": "Type de transport" },
+    { "id": "tr_molecules", "name": "Molécules concernées" },
+    { "id": "tr_exemple",   "name": "Exemple" },
+    { "id": "tr_pkA",       "name": "PKA / pH" }
+  ],
+  "treeEntities": [
+    { "id": "te_filtration",    "names": ["Filtration glomérulaire", "Glomérule"] },
+    { "id": "te_secretion",     "names": ["Sécrétion tubulaire", "TCP"] },
+    { "id": "te_reabsorption_actif",  "names": ["Réabsorption tubulaire active", "Réabsorption active"] },
+    { "id": "te_reabsorption_passif", "names": ["Réabsorption tubulaire passive", "Réabsorption passive"] },
+    { "id": "te_acides_faibles", "names": ["Réabsorption passive — Acides faibles", "Acides faibles"] },
+    { "id": "te_bases_faibles",  "names": ["Réabsorption passive — Bases faibles", "Bases faibles"] }
+  ],
+  "treeValues": [
+    { "id": "tv1",  "entityId": "te_filtration",    "traitId": "tr_type",      "value": "Passif",                        "starred": false, "note": "" },
+    { "id": "tv2",  "entityId": "te_filtration",    "traitId": "tr_molecules", "value": "< 68 000 Da",                   "starred": true,  "note": "Seules les molécules de petit poids moléculaire (< 68 000 Da) franchissent le filtre glomérulaire." },
+
+    { "id": "tv3",  "entityId": "te_secretion",     "traitId": "tr_type",      "value": "Actif (transporteurs)",         "starred": true,  "note": "Utilise des transporteurs membranaires (OAT, OCT) au niveau du tubule contourné proximal (TCP)." },
+    { "id": "tv4",  "entityId": "te_secretion",     "traitId": "tr_molecules", "value": "Hydrosolubles ionisées",        "starred": false, "note": "" },
+    { "id": "tv5",  "entityId": "te_secretion",     "traitId": "tr_exemple",   "value": "Probénicide",                   "starred": false, "note": "" },
+    { "id": "tv6",  "entityId": "te_secretion",     "traitId": "tr_exemple",   "value": "Pénicilline G",                 "starred": false, "note": "" },
+
+    { "id": "tv7",  "entityId": "te_reabsorption_actif",  "traitId": "tr_type",      "value": "Actif (transporteurs)",   "starred": false, "note": "" },
+    { "id": "tv8",  "entityId": "te_reabsorption_actif",  "traitId": "tr_molecules", "value": "Endogènes semblables AA", "starred": true,  "note": "Molécules endogènes structurellement proches des acides aminés (AA) — transportées par les mêmes carriers." },
+    { "id": "tv9",  "entityId": "te_reabsorption_actif",  "traitId": "tr_exemple",   "value": "α-Méthyl Dopa",           "starred": false, "note": "" },
+
+    { "id": "tv10", "entityId": "te_reabsorption_passif", "traitId": "tr_type",      "value": "Passif",                  "starred": false, "note": "" },
+    { "id": "tv11", "entityId": "te_reabsorption_passif", "traitId": "tr_molecules", "value": "Liposolubles non ionisées","starred": true,  "note": "La forme non ionisée est liposoluble et diffuse librement à travers les membranes tubulaires." },
+    { "id": "tv12", "entityId": "te_reabsorption_passif", "traitId": "tr_pkA",       "value": "PKA",                     "starred": true,  "note": "La réabsorption passive dépend du pKa de la molécule et du pH urinaire (équilibre Henderson-Hasselbalch)." },
+
+    { "id": "tv13", "entityId": "te_acides_faibles",  "traitId": "tr_molecules", "value": "Acides faibles",              "starred": false, "note": "" },
+    { "id": "tv14", "entityId": "te_acides_faibles",  "traitId": "tr_pkA",       "value": "PKA < 2,5 → réabsorption nulle",    "starred": true, "note": "Si pKa < 2,5 : molécule toujours ionisée → non réabsorbée (éliminée dans les urines)." },
+    { "id": "tv15", "entityId": "te_acides_faibles",  "traitId": "tr_pkA",       "value": "PKA 2,5–7,5 → pH dépendante", "starred": true,  "note": "Zone intermédiaire : la réabsorption dépend du pH urinaire. Alcalinisation → ionisation → élimination accrue." },
+    { "id": "tv16", "entityId": "te_acides_faibles",  "traitId": "tr_pkA",       "value": "PKA > 7,5 → réabsorption intense", "starred": true, "note": "Si pKa > 7,5 : molécule peu ionisée à pH urinaire → très réabsorbée → longue demi-vie." },
+
+    { "id": "tv17", "entityId": "te_bases_faibles",   "traitId": "tr_molecules", "value": "Bases faibles",               "starred": false, "note": "" },
+    { "id": "tv18", "entityId": "te_bases_faibles",   "traitId": "tr_pkA",       "value": "PKA < 6 → réabsorption intense",   "starred": true, "note": "Base faible de faible pKa : peu ionisée → réabsorbée (inverse des acides faibles)." },
+    { "id": "tv19", "entityId": "te_bases_faibles",   "traitId": "tr_pkA",       "value": "PKA 6–12 → pH dépendante",    "starred": true,  "note": "Zone intermédiaire pour les bases : acidification des urines → ionisation → élimination. Utile en cas de surdosage (ex: amphétamines)." },
+    { "id": "tv20", "entityId": "te_bases_faibles",   "traitId": "tr_pkA",       "value": "PKA > 12 → réabsorption nulle",    "starred": true, "note": "Si pKa > 12 : toujours ionisée → non réabsorbée." }
+  ]
+}
