@@ -109,7 +109,7 @@
   .score-big{font-family:var(--font-display);font-size:36px;font-weight:800;color:var(--ink);line-height:1;}
   .score-label{font-size:13px;color:var(--ink2);}
   #feedback{font-size:13px;margin-top:12px;font-weight:500;min-height:20px;padding:0 4px;transition:opacity .2s;}
-  .fb-ok{color:#1a7a58;}.fb-err{color:var(--accent);}.fb-info{color:var(--ink2);}
+  .fb-ok{color:#1a7a58;}.fb-err{color:#E08A1A;}.fb-info{color:var(--ink2);}
   .hint{font-size:12px;color:var(--ink3);margin-top:14px;}
 
   /* ======= SCHEMA MODE ======= */
@@ -185,7 +185,7 @@
   .ref-play-wrap{display:flex;flex-direction:column;gap:8px;}
   .ref-play-row{display:grid;grid-template-columns:1fr 110px 110px 60px 24px;gap:8px;align-items:center;background:var(--surface);border-radius:var(--radius-sm);padding:10px 14px;border:1.5px solid var(--border);box-shadow:var(--shadow);transition:border-color .2s,background .2s;}
   .ref-play-row.correct{border-color:#1a7a58;background:#f0fdf7;}
-  .ref-play-row.wrong{border-color:#d44d4d;background:#fdf0f0;}
+  .ref-play-row.wrong{border-color:#E08A1A;background:#FFF3E0;}
   .ref-play-name{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--ink);}
   .ref-play-input{height:36px;border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);padding:0 10px;font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--ink);background:var(--surface);outline:none;width:100%;text-align:center;transition:border-color .15s,background .15s;}
   .ref-play-input:focus{border-color:var(--accent);}
@@ -418,7 +418,7 @@
   .score-stat-val { font-family:var(--font-display); font-size:28px; font-weight:800; line-height:1; }
   .score-stat-lbl { font-size:10px; text-transform:uppercase; letter-spacing:.7px; color:var(--ink3); margin-top:4px; font-family:var(--font-display); font-weight:600; }
   .score-stat.correct .score-stat-val { color:#1a7a58; }
-  .score-stat.errors  .score-stat-val { color:var(--accent); }
+  .score-stat.errors  .score-stat-val { color:#E08A1A; }
   .score-stat.pct     .score-stat-val { color:var(--ink); }
   .score-stat.timer   .score-stat-val { color:var(--ink2); font-size:20px; }
   .score-panel-bar { height:5px; background:var(--surface2); }
@@ -435,7 +435,7 @@
   .history-stat { display:flex; align-items:center; gap:4px; color:var(--ink2); }
   .history-stat strong { font-family:var(--font-display); font-weight:700; }
   .history-stat.ok strong { color:#1a7a58; }
-  .history-stat.err strong { color:var(--accent); }
+  .history-stat.err strong { color:#E08A1A; }
   .history-stat.pct strong { color:var(--ink); }
   .history-empty { font-size:13px; color:var(--ink3); text-align:center; padding:24px 0; }
 
@@ -825,7 +825,7 @@ const PALETTES = [
   {bg:'#E4F9F5',border:'#1E9E87',name:'#0a4d43',chip:'#9EE8DA',chipText:'#0a4d43'},
   {bg:'#FFF0EB',border:'#D4522A',name:'#7a2410',chip:'#FAC4AE',chipText:'#7a2410'},
 ];
-const PT_COLORS = ['#E05C5C','#E08A1A','#2A9D8F','#457BE8','#9B59B6','#27AE60','#D4522A','#1A7A9A'];
+const PT_COLORS = ['#457BE8','#E08A1A','#2A9D8F','#9B59B6','#27AE60','#1A7A9A','#C0782A','#5B8DEF'];
 
 // ── SINGLE SOURCE OF TRUTH ──────────────────────────────────────
 // cats[]  : { id, name, parentId }  ← shared by BOTH modes (parentId=null means root)
@@ -1080,10 +1080,11 @@ function openSubCatInput(parentId, btnEl, col) {
   btn.textContent='✓';
   const doAdd = ()=>{
     const v=inp.value.trim(); if(!v){ wrap.remove(); return; }
-    addCategory(parentId, v); wrap.remove();
+    addCategory(parentId, v);
+    inp.value=''; inp.focus(); // stay open, clear and refocus
   };
   inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault();doAdd();} if(e.key==='Escape')wrap.remove(); });
-  btn.addEventListener('click',doAdd);
+  btn.addEventListener('click',()=>{ doAdd(); wrap.remove(); }); // button click still closes
   wrap.appendChild(inp); wrap.appendChild(btn);
   btnEl.parentNode.insertBefore(wrap, btnEl.nextSibling);
   setTimeout(()=>inp.focus(),0);
@@ -1421,7 +1422,7 @@ function initPlay() {
         // Save history when session complete
         if(score === scoreState['classify'].total) { stopScoreTimer('classify'); saveSessionToHistory('classify'); }
       } else {
-        placed.style.cssText=`background:#fde8e8;border-color:#d44d4d;color:#7a1a1a;`;
+        placed.style.cssText=`background:#FFF3E0;border-color:#E08A1A;color:#7A4500;`;
         chipsDiv.appendChild(placed); src.remove();
         showFeedback(`"${word.text}" n'appartient pas à "${cat.name}". Réessayez !`,'err'); recordError('classify');
         setTimeout(()=>{placed.remove(); pool.appendChild(makePoolChip(chipData));},1300);
@@ -2059,10 +2060,10 @@ function validateRef() {
     const maxOk = checkField(maxInp, p.max);
 
     if(minOk) { minInp.style.borderColor='#1a7a58'; minInp.style.background='#f0fdf7'; correct++; }
-    else if(minInp.value!=='') { minInp.style.borderColor='#d44d4d'; minInp.style.background='#fdf0f0'; errors++; }
+    else if(minInp.value!=='') { minInp.style.borderColor='#E08A1A'; minInp.style.background='#FFF3E0'; errors++; }
 
     if(maxOk) { maxInp.style.borderColor='#1a7a58'; maxInp.style.background='#f0fdf7'; correct++; }
-    else if(maxInp.value!=='') { maxInp.style.borderColor='#d44d4d'; maxInp.style.background='#fdf0f0'; errors++; }
+    else if(maxInp.value!=='') { maxInp.style.borderColor='#E08A1A'; maxInp.style.background='#FFF3E0'; errors++; }
 
     if(minOk && maxOk){ row.className='ref-play-row correct'; status.textContent='✓'; }
     else if(!minOk && !maxOk && minInp.value==='' && maxInp.value===''){ row.className='ref-play-row'; status.textContent=''; }
@@ -2099,7 +2100,7 @@ let treeValues   = [];
 const entityPrimaryName = e => e.names ? e.names[0] : (e.name||'?');
 const entityAllNames    = e => e.names ? e.names : [e.name||'?'];
 let activeCellEditor = null; // { entityId, traitId, el }
-const TREE_COLORS = ['#4A90D9','#3AAA6E','#E08A1A','#D44D8A','#7A5CE0','#1E9E87','#D4522A','#e05c5c'];
+const TREE_COLORS = ['#4A90D9','#3AAA6E','#E08A1A','#D44D8A','#7A5CE0','#1E9E87','#C0782A','#5B8DEF'];
 const treeColor = i => TREE_COLORS[i % TREE_COLORS.length];
 
 function setTreePhase(p) {
@@ -2402,7 +2403,7 @@ function initTreePlay() {
         const placed = document.createElement('span'); placed.className='tree-placed-chip';
         placed.style.cssText = correct
           ? `background:${entityColor}18;border-color:${entityColor};color:${entityColor};`
-          : `background:#fde8e8;border-color:#d44d4d;color:#a32d2d;`;
+          : `background:#FFF3E0;border-color:#E08A1A;color:#7A4500;`;
         placed.textContent = chip.value;
         // Check if any treeValue for this chip has a note
         const tvNote = treeValues.find(v=>v.traitId===chip.traitId && v.value===chip.value && v.starred && v.note);
@@ -2665,7 +2666,7 @@ function updateScoreDisplay(mode) {
   if(barEl) {
     const prog = s.total > 0 ? (s.correct / s.total)*100 : 0;
     barEl.style.width = Math.min(prog,100)+'%';
-    barEl.style.background = pct===null ? '#1a7a58' : pct>=80 ? '#1a7a58' : pct>=50 ? '#e08a1a' : '#d44d4d';
+    barEl.style.background = pct===null ? '#1a7a58' : pct>=80 ? '#1a7a58' : pct>=50 ? '#e08a1a' : '#e08a1a';
   }
 }
 
