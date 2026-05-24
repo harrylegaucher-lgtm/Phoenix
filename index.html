@@ -231,7 +231,7 @@
   .tree-play-section-pool { display:flex; flex-wrap:wrap; gap:6px; padding:10px; background:var(--surface2); border-radius:var(--radius-sm); margin-bottom:10px; min-height:40px; border:1px dashed var(--border-strong); }
   .tree-play-section-pool:empty::after { content:'Toutes les valeurs de ce trait placées !'; font-size:12px; color:var(--ink3); }
   .tree-play-entity-row { display:grid; gap:8px; align-items:center; margin-bottom:6px; }
-  .tree-play-entity-label { font-family:var(--font-display); font-size:12px; font-weight:600; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tree-play-entity-label { font-family:var(--font-display); font-size:12px; font-weight:600; color:var(--ink); white-space:normal; overflow:visible; word-break:break-word; line-height:1.3; }
   .tree-play-drop-zone { display:flex; flex-wrap:wrap; gap:4px; min-height:34px; padding:5px 8px; border-radius:var(--radius-sm); border:1.5px dashed var(--border-strong); background:var(--surface); transition:all .12s; }
   .tree-play-drop-zone.over { border-color:var(--accent); background:var(--accent-light); border-style:solid; }
   .tree-placed-chip { font-size:11px; font-weight:600; padding:3px 10px; border-radius:99px; border:1.5px solid; font-family:var(--font-display); cursor:pointer; }
@@ -1824,7 +1824,7 @@ document.getElementById('tree-entity-input').addEventListener('keydown',e=>{
   if(e.key==='Enter'){ e.preventDefault(); addTreeEntity(); }
 });
 document.getElementById('tree-trait-input').addEventListener('keydown',e=>{
-  if(e.key==='Enter'){ e.preventDefault(); addTreeTrait(); document.getElementById('tree-entity-input').focus(); }
+  if(e.key==='Enter'){ e.preventDefault(); addTreeTrait(); }
 });
 document.getElementById('ref-param-input').addEventListener('keydown',e=>{
   if(e.key==='Enter'){ e.preventDefault(); document.getElementById('ref-min-input').focus(); }
@@ -2367,7 +2367,7 @@ function initTreePlay() {
 
       const entityColor = treeColor(treeEntities.indexOf(entity));
       const row = document.createElement('div'); row.className='tree-play-entity-row';
-      row.style.cssText='display:grid;grid-template-columns:160px 1fr;gap:8px;align-items:center;margin-bottom:6px;';
+      row.style.cssText='display:grid;grid-template-columns:minmax(120px,40%) 1fr;gap:8px;align-items:start;margin-bottom:6px;';
 
       const label = document.createElement('div'); label.className='tree-play-entity-label';
       const names = entityAllNames(entity);
