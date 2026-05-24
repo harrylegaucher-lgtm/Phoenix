@@ -1068,8 +1068,16 @@ function addCategory(parentId=null, name=null) {
 }
 
 // Open inline sub-category input inside a card
+// Track which parent has the sub-input open
+let activeSubCatParentId = null;
+
 function openSubCatInput(parentId, btnEl, col) {
-  // Remove any existing sub-input
+  activeSubCatParentId = parentId;
+  document.querySelectorAll('.cat-sub-input-wrap').forEach(el=>el.remove());
+  _renderSubCatInput(parentId, btnEl, col);
+}
+
+function _renderSubCatInput(parentId, btnEl, col) {
   document.querySelectorAll('.cat-sub-input-wrap').forEach(el=>el.remove());
   const wrap = document.createElement('div'); wrap.className='cat-sub-input-wrap';
   const inp  = document.createElement('input'); inp.className='cat-sub-input';
@@ -1078,16 +1086,50 @@ function openSubCatInput(parentId, btnEl, col) {
   const btn  = document.createElement('button'); btn.className='cat-sub-confirm';
   btn.style.cssText=`background:${col};color:#fff;`;
   btn.textContent='✓';
-  const doAdd = ()=>{
-    const v=inp.value.trim(); if(!v){ wrap.remove(); return; }
-    addCategory(parentId, v);
-    inp.value=''; inp.focus(); // stay open, clear and refocus
+  const doAdd = (andClose) => {
+    const v=inp.value.trim();
+    if(!v){ if(andClose) { activeSubCatParentId=null; wrap.remove(); } return; }
+    addCategory(parentId, v); // this calls renderSetup which destroys wrap
+    if(!andClose) {
+      // renderSetup rebuilt the DOM — re-inject the input after the new btn
+      setTimeout(()=>{
+        const newBtn = document.querySelector(`.cat-sub-input-wrap ~ * .cat-add-sub-btn`) ||
+          [...document.querySelectorAll('.cat-add-sub-btn')].find(b=>{
+            let cur=b; while(cur){ if(cur.dataset&&cur.dataset.pid===parentId) return true; cur=cur.parentElement; } return false;
+          });
+        // Simpler: re-inject directly under the parent card
+        _reinjectSubCatInput(parentId, col);
+      }, 0);
+    } else {
+      activeSubCatParentId = null;
+    }
   };
-  inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault();doAdd();} if(e.key==='Escape')wrap.remove(); });
-  btn.addEventListener('click',()=>{ doAdd(); wrap.remove(); }); // button click still closes
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){ e.preventDefault(); doAdd(false); }
+    if(e.key==='Escape'){ activeSubCatParentId=null; wrap.remove(); }
+  });
+  btn.addEventListener('click',()=>doAdd(true));
   wrap.appendChild(inp); wrap.appendChild(btn);
   btnEl.parentNode.insertBefore(wrap, btnEl.nextSibling);
   setTimeout(()=>inp.focus(),0);
+}
+
+function _reinjectSubCatInput(parentId, col) {
+  // Find the footer of the parent cat card and re-inject the input
+  const allBtns = [...document.querySelectorAll('.cat-add-sub-btn')];
+  for(const btn of allBtns) {
+    // Walk up to find which cat card this belongs to — check if ancestor has the right cat
+    let card = btn.closest('.cat-card');
+    if(!card) continue;
+    // Find cat index by matching name from DOM
+    const nameEl = card.querySelector('.cat-name');
+    if(!nameEl) continue;
+    const cat = cats.find(c=>c.id===parentId);
+    if(!cat) continue;
+    if(nameEl.textContent.trim() !== cat.name) continue;
+    _renderSubCatInput(parentId, btn, col);
+    return;
+  }
 }
 function addWord() {
   const inp = document.getElementById('word-input');
