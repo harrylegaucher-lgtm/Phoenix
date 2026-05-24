@@ -846,40 +846,76 @@ let schemaImageDataUrl = null;
 let schemaScore = 0;
 
 // ── CLICK-TO-PLACE STATE ─────────────────────────────────────────
-// Allows clicking a chip to select it, then clicking a drop zone to place it
-let clickSelectedChip = null; // { chipEl, chipData, mode:'classify'|'tree', traitId? }
+// selectedChips: array of { chipEl, chipData, mode:'classify'|'tree', traitId? }
+let selectedChips = [];
 
 function clearClickSelection() {
-  if(clickSelectedChip && clickSelectedChip.chipEl) {
-    clickSelectedChip.chipEl.classList.remove('chip-selected');
-  }
-  clickSelectedChip = null;
-  // Remove click-target highlight from all drop zones
+  selectedChips.forEach(s => s.chipEl && s.chipEl.classList.remove('chip-selected'));
+  selectedChips = [];
   document.querySelectorAll('.click-target').forEach(el => el.classList.remove('click-target'));
-  // Remove hint
   document.querySelectorAll('.click-mode-hint').forEach(el => el.remove());
 }
 
-function activateClickSelection(chipEl, chipData, mode, traitId) {
-  clearClickSelection();
-  clickSelectedChip = { chipEl, chipData, mode, traitId };
-  chipEl.classList.add('chip-selected');
-  // Highlight valid drop zones
+function updateSelectionHint() {
+  document.querySelectorAll('.click-target').forEach(el => el.classList.remove('click-target'));
+  document.querySelectorAll('.click-mode-hint').forEach(el => el.remove());
+  if(!selectedChips.length) return;
+  const mode    = selectedChips[0].mode;
+  const traitId = selectedChips[0].traitId;
+  const count   = selectedChips.length;
+  const label   = count === 1 ? `"${selectedChips[0].chipData.text}"` : `${count} mots sélectionnés`;
+
   if(mode === 'classify') {
-    document.querySelectorAll('#sandbox-play .cat-card').forEach(card => card.classList.add('click-target'));
+    document.querySelectorAll('#sandbox-play .cat-card').forEach(c => c.classList.add('click-target'));
+    const poolEl = document.getElementById('word-pool');
+    if(poolEl) {
+      const hint = document.createElement('div'); hint.className='click-mode-hint';
+      hint.innerHTML = `👆 Cliquez sur une classe pour placer ${label}`;
+      if(count > 1) hint.innerHTML += ` <span style="opacity:.6;font-size:10px;">(Ctrl+clic pour ajouter/retirer)</span>`;
+      poolEl.parentNode.insertBefore(hint, poolEl.nextSibling);
+    }
   } else if(mode === 'tree' && traitId) {
     document.querySelectorAll(`.tree-play-drop-zone[data-trait-id="${traitId}"]`).forEach(z => z.classList.add('click-target'));
+    const poolEl = document.getElementById('tree-pool-'+traitId);
+    if(poolEl) {
+      const hint = document.createElement('div'); hint.className='click-mode-hint';
+      hint.innerHTML = `👆 Cliquez sur une zone pour placer ${label}`;
+      if(count > 1) hint.innerHTML += ` <span style="opacity:.6;font-size:10px;">(Ctrl+clic pour ajouter/retirer)</span>`;
+      poolEl.parentNode.insertBefore(hint, poolEl.nextSibling);
+    }
   }
-  // Show hint near pool
-  const poolEl = mode === 'classify'
-    ? document.getElementById('word-pool')
-    : document.getElementById('tree-pool-'+traitId);
-  if(poolEl) {
-    const hint = document.createElement('div');
-    hint.className='click-mode-hint';
-    hint.textContent='👆 Cliquez sur une classe pour placer "'+chipData.text+'"';
-    poolEl.parentNode.insertBefore(hint, poolEl.nextSibling);
+}
+
+// Call this on every chip click (makePoolChip, makeTreeChip)
+function handleChipClick(chipEl, chipData, mode, traitId, ctrlKey) {
+  const existIdx = selectedChips.findIndex(s => s.chipEl === chipEl);
+  if(ctrlKey) {
+    // Toggle this chip in the multi-selection
+    if(existIdx !== -1) {
+      // Deselect this one
+      chipEl.classList.remove('chip-selected');
+      selectedChips.splice(existIdx, 1);
+    } else {
+      // Only allow chips of the same mode+traitId
+      const compatible = selectedChips.length === 0 ||
+        (selectedChips[0].mode === mode && selectedChips[0].traitId === traitId);
+      if(compatible) {
+        chipEl.classList.add('chip-selected');
+        selectedChips.push({ chipEl, chipData, mode, traitId });
+      }
+    }
+  } else {
+    // Single click: if already the only selected chip → deselect; otherwise select only this one
+    if(existIdx !== -1 && selectedChips.length === 1) {
+      // Deselect
+      clearClickSelection(); return;
+    }
+    clearClickSelection();
+    chipEl.classList.add('chip-selected');
+    selectedChips = [{ chipEl, chipData, mode, traitId }];
   }
+  if(selectedChips.length) updateSelectionHint();
+  else { document.querySelectorAll('.click-target').forEach(el=>el.classList.remove('click-target')); document.querySelectorAll('.click-mode-hint').forEach(el=>el.remove()); }
 }
 
 // ── SYNC HELPERS ─────────────────────────────────────────────────
@@ -1514,41 +1550,68 @@ function initPlay() {
         setTimeout(()=>{placed.remove(); pool.appendChild(makePoolChip(chipData));},1300);
       }
     });
-    // Click-to-place: fire when a chip is selected via click
+    // Click-to-place: fire when chips are selected via click
     card.addEventListener('click', e => {
-      if(!clickSelectedChip || clickSelectedChip.mode !== 'classify') return;
+      if(!selectedChips.length || selectedChips[0].mode !== 'classify') return;
       e.stopPropagation();
-      const chipData = clickSelectedChip.chipData;
-      const chipEl   = clickSelectedChip.chipEl;
+      const toProcess = [...selectedChips];
       clearClickSelection();
-      const word = words.find(w=>w.id===chipData.wordId); if(!word) return;
-      const correct = remainingPlacements[word.id] && remainingPlacements[word.id].has(cat.id);
-      const placed = document.createElement('span'); placed.className='chip chip-correct pop';
-      placed.textContent = word.text; placed.dataset.chipId = chipData.chipId;
-      if(correct){
-        remainingPlacements[word.id].delete(cat.id);
-        placed.style.cssText=`background:${p.chip};border-color:${p.border};color:${p.chipText};cursor:pointer;`;
-        placed.title='Cliquer pour annuler';
-        placed.addEventListener('click',()=>{
-          remainingPlacements[word.id].add(cat.id);
-          placed.remove(); score--;
+
+      const wrongOnes = [];
+      let anyCorrect = false;
+
+      for(const sel of toProcess) {
+        const { chipEl, chipData: cd } = sel;
+        const word = words.find(w=>w.id===cd.wordId); if(!word) continue;
+        const correct = remainingPlacements[word.id] && remainingPlacements[word.id].has(cat.id);
+        const placed = document.createElement('span'); placed.className='chip chip-correct pop';
+        placed.textContent = word.text; placed.dataset.chipId = cd.chipId;
+        if(correct){
+          remainingPlacements[word.id].delete(cat.id);
+          placed.style.cssText=`background:${p.chip};border-color:${p.border};color:${p.chipText};cursor:pointer;`;
+          placed.title='Cliquer pour annuler';
+          placed.addEventListener('click',()=>{
+            remainingPlacements[word.id].add(cat.id);
+            placed.remove(); score--;
+            document.getElementById('score').textContent=score;
+            pool.appendChild(makePoolChip(cd));
+            showFeedback(`"${word.text}" remis dans la liste.`,'info');
+          });
+          chipsDiv.appendChild(placed); chipEl.remove(); score++;
           document.getElementById('score').textContent=score;
-          pool.appendChild(makePoolChip(chipData));
-          showFeedback(`"${word.text}" remis dans la liste.`,'info');
-        });
-        chipsDiv.appendChild(placed); chipEl.remove(); score++;
-        document.getElementById('score').textContent=score;
-        showFeedback(`Bien joué ! "${word.text}" appartient à "${cat.name}" !`,'ok');
-        returnOrRemoveChip(chipData);
-        // Re-select chip if it came back (multi-class word still has placements)
-        const returnedChip = [...pool.children].find(el=>el.dataset.chipId===chipData.chipId);
-        if(returnedChip) activateClickSelection(returnedChip, chipData, 'classify');
-        if(score === scoreState['classify'].total) { stopScoreTimer('classify'); saveSessionToHistory('classify'); }
-      } else {
-        placed.style.cssText=`background:#FFF3E0;border-color:#E08A1A;color:#7A4500;`;
-        chipsDiv.appendChild(placed);
-        showFeedback(`"${word.text}" n'appartient pas à "${cat.name}". Réessayez !`,'err'); recordError('classify');
-        setTimeout(()=>{ placed.remove(); const nc=makePoolChip(chipData); pool.appendChild(nc); activateClickSelection(nc, chipData, 'classify'); },1300);
+          anyCorrect = true;
+          returnOrRemoveChip(cd);
+          if(score === scoreState['classify'].total) { stopScoreTimer('classify'); saveSessionToHistory('classify'); }
+        } else {
+          // Chip stays in pool (never removed) — just record error
+          wrongOnes.push({ chipEl, chipData: cd, word });
+          const errFlash = document.createElement('span'); errFlash.className='chip pop';
+          errFlash.textContent = word.text;
+          errFlash.style.cssText='background:#FFF3E0;border-color:#E08A1A;color:#7A4500;';
+          chipsDiv.appendChild(errFlash);
+          recordError('classify');
+          setTimeout(()=>errFlash.remove(), 1200);
+        }
+      }
+
+      // Feedback
+      if(anyCorrect && !wrongOnes.length) {
+        showFeedback(`Bien joué !`, 'ok');
+      } else if(wrongOnes.length) {
+        const names = wrongOnes.map(w=>'"'+w.word.text+'"').join(', ');
+        showFeedback(`${names} n'appartient pas à "${cat.name}". Réessayez !`, 'err');
+      }
+
+      // Re-select: returned multi-class chips + wrong chips (they stayed in pool)
+      const reselect = [];
+      for(const sel of toProcess) {
+        const returned = [...pool.children].find(el=>el.dataset.chipId===sel.chipData.chipId);
+        if(returned) reselect.push({ chipEl: returned, chipData: sel.chipData, mode: 'classify', traitId: undefined });
+      }
+      if(reselect.length) {
+        reselect.forEach(s=>s.chipEl.classList.add('chip-selected'));
+        selectedChips = reselect;
+        updateSelectionHint();
       }
     });
     node.appendChild(card);
@@ -1573,14 +1636,10 @@ function makePoolChip(chipData){
   chip.draggable=true; chip.dataset.chipId=chipData.chipId;
   chip.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',chipData.chipId);setTimeout(()=>chip.classList.add('dragging'),0);});
   chip.addEventListener('dragend',()=>chip.classList.remove('dragging'));
-  // Click to select/deselect
+  // Click to select/deselect (supports Ctrl for multi-select)
   chip.addEventListener('click', e => {
     e.stopPropagation();
-    if(clickSelectedChip && clickSelectedChip.chipEl === chip) {
-      clearClickSelection(); // Deselect if clicking same chip
-    } else {
-      activateClickSelection(chip, chipData, 'classify');
-    }
+    handleChipClick(chip, chipData, 'classify', undefined, e.ctrlKey || e.metaKey);
   });
   // Apply current search filter immediately
   const q = (document.getElementById('play-search')?.value||'').trim().toLowerCase();
@@ -2437,8 +2496,8 @@ function closeCellEditor() {
 document.addEventListener('click', ()=>closeCellEditor());
 // Clear chip click-selection when clicking outside relevant zones
 document.addEventListener('click', e => {
-  if(!clickSelectedChip) return;
-  const inside = e.target.closest('.chip-free,.chip-selected,.cat-card,.tree-play-drop-zone,.click-mode-hint');
+  if(!selectedChips.length) return;
+  const inside = e.target.closest('.chip-free,.chip-selected,.cat-card,.tree-play-drop-zone,.click-mode-hint,.tree-play-chip');
   if(!inside) clearClickSelection();
 });
 
@@ -2583,49 +2642,78 @@ function initTreePlay() {
       });
       // Click-to-place handler for tree mode
       dropZone.addEventListener('click', e => {
-        if(!clickSelectedChip || clickSelectedChip.mode !== 'tree' || clickSelectedChip.traitId !== trait.id) return;
+        if(!selectedChips.length || selectedChips[0].mode !== 'tree' || selectedChips[0].traitId !== trait.id) return;
         e.stopPropagation();
-        const chip = clickSelectedChip.chipData;
-        const chipEl = clickSelectedChip.chipEl;
+        const toProcess = [...selectedChips];
         clearClickSelection();
-        const rem = remainingPlacements[entity.id]?.[trait.id] || [];
-        const matchIdx = rem.indexOf(chip.value);
-        const correct = matchIdx !== -1;
-        const placed = document.createElement('span'); placed.className='tree-placed-chip';
-        placed.style.cssText = correct
-          ? `background:${entityColor}18;border-color:${entityColor};color:${entityColor};`
-          : `background:#FFF3E0;border-color:#E08A1A;color:#7A4500;`;
-        placed.textContent = chip.value;
-        const tvNote = treeValues.find(v=>v.traitId===chip.traitId && v.value===chip.value && v.starred && v.note);
-        if(correct){
-          rem.splice(matchIdx, 1);
-          if(tvNote){
-            placed.innerHTML=chip.value+`<span style="font-size:8px;vertical-align:super;font-weight:800;margin-left:2px;">*</span>`;
-            placed.title='Cliquer pour voir la note';
-            placed.addEventListener('click', ()=>{ openTreeNotePopup(tvNote, placed, entityColor); });
+
+        const wrongOnes = [];
+        let anyCorrect = false;
+
+        for(const sel of toProcess) {
+          const { chipEl, chipData: chip } = sel;
+          const rem = remainingPlacements[entity.id]?.[trait.id] || [];
+          const matchIdx = rem.indexOf(chip.value);
+          const correct = matchIdx !== -1;
+          const placed = document.createElement('span'); placed.className='tree-placed-chip';
+          placed.style.cssText = correct
+            ? `background:${entityColor}18;border-color:${entityColor};color:${entityColor};`
+            : `background:#FFF3E0;border-color:#E08A1A;color:#7A4500;`;
+          placed.textContent = chip.value;
+          const tvNote = treeValues.find(v=>v.traitId===chip.traitId && v.value===chip.value && v.starred && v.note);
+          if(correct){
+            rem.splice(matchIdx, 1);
+            if(tvNote){
+              placed.innerHTML=chip.value+`<span style="font-size:8px;vertical-align:super;font-weight:800;margin-left:2px;">*</span>`;
+              placed.title='Cliquer pour voir la note';
+              placed.addEventListener('click', ()=>{ openTreeNotePopup(tvNote, placed, entityColor); });
+            } else {
+              placed.title='Cliquer pour annuler';
+              placed.addEventListener('click', ()=>{
+                placed.remove(); treeScore--;
+                document.getElementById('tree-score').textContent=treeScore;
+                rem.push(chip.value);
+                poolEl.appendChild(makeTreeChip(chip, col));
+                setTreeFeedback(`"${chip.value}" remis dans la liste.`,'info');
+              });
+            }
+            dropZone.appendChild(placed); chipEl.remove();
+            treeScore++; document.getElementById('tree-score').textContent=treeScore; recordCorrect('tree');
+            anyCorrect = true;
+            if(treeScore===scoreState['tree'].total){stopScoreTimer('tree');saveSessionToHistory('tree');}
+            returnOrRemoveChip(chip, poolEl, col);
           } else {
-            placed.title='Cliquer pour annuler';
-            placed.addEventListener('click', ()=>{
-              placed.remove(); treeScore--;
-              document.getElementById('tree-score').textContent=treeScore;
-              rem.push(chip.value);
-              poolEl.appendChild(makeTreeChip(chip, col));
-              setTreeFeedback(`"${chip.value}" remis dans la liste.`,'info');
-            });
+            // chip stays in pool — flash error only
+            wrongOnes.push({ chipEl, chipData: chip });
+            const errFlash = document.createElement('span'); errFlash.className='tree-placed-chip';
+            errFlash.textContent = chip.value;
+            errFlash.style.cssText='background:#FFF3E0;border-color:#E08A1A;color:#7A4500;';
+            dropZone.appendChild(errFlash);
+            recordError('tree');
+            setTimeout(()=>errFlash.remove(), 1200);
           }
-          dropZone.appendChild(placed); chipEl.remove();
-          treeScore++; document.getElementById('tree-score').textContent=treeScore; recordCorrect('tree'); if(treeScore===scoreState['tree'].total){stopScoreTimer('tree');saveSessionToHistory('tree');}
-          setTreeFeedback(`✓ "${chip.value}" appartient bien à ${entityPrimaryName(entity)} !`,'ok');
-          returnOrRemoveChip(chip, poolEl, col);
-          // Re-select if chip returned to pool
-          const returnedChip = poolEl.querySelector(`[data-chip-id="${chip.chipId}"]`);
-          if(returnedChip) activateClickSelection(returnedChip, { ...chip, text: chip.value }, 'tree', trait.id);
-        } else {
-          dropZone.appendChild(placed);
-          const correctEntity = treeEntities.find(en => (remainingPlacements[en.id]?.[trait.id]||[]).includes(chip.value));
+        }
+
+        if(anyCorrect && !wrongOnes.length) {
+          setTreeFeedback(`✓ Bien placé !`, 'ok');
+        } else if(wrongOnes.length) {
+          const correctEntity = treeEntities.find(en =>
+            (remainingPlacements[en.id]?.[trait.id]||[]).includes(wrongOnes[0].chipData.value)
+          );
           const hint = correctEntity ? ` → attendu dans "${entityPrimaryName(correctEntity)}"` : '';
-          setTreeFeedback(`✗ "${chip.value}" n'appartient pas à "${entityPrimaryName(entity)}"${hint}.`,'err'); recordError('tree');
-          setTimeout(()=>{ placed.remove(); const nc=makeTreeChip(chip, col); poolEl.appendChild(nc); activateClickSelection(nc, { ...chip, text: chip.value }, 'tree', trait.id); },1500);
+          setTreeFeedback(`✗ "${wrongOnes[0].chipData.value}" n'appartient pas à "${entityPrimaryName(entity)}"${hint}.`, 'err');
+        }
+
+        // Re-select returned/wrong chips
+        const reselect = [];
+        for(const sel of toProcess) {
+          const returned = poolEl.querySelector(`[data-chip-id="${sel.chipData.chipId}"]`);
+          if(returned) reselect.push({ chipEl: returned, chipData: sel.chipData, mode: 'tree', traitId: trait.id });
+        }
+        if(reselect.length) {
+          reselect.forEach(s=>s.chipEl.classList.add('chip-selected'));
+          selectedChips = reselect;
+          updateSelectionHint();
         }
       });
 
@@ -2651,14 +2739,10 @@ function makeTreeChip(c, col) {
   }
   chip.addEventListener('dragstart',e=>{ e.dataTransfer.setData('text/plain',c.chipId); setTimeout(()=>chip.classList.add('dragging'),0); });
   chip.addEventListener('dragend',()=>chip.classList.remove('dragging'));
-  // Click to select/deselect
+  // Click to select/deselect (supports Ctrl for multi-select)
   chip.addEventListener('click', e => {
     e.stopPropagation();
-    if(clickSelectedChip && clickSelectedChip.chipEl === chip) {
-      clearClickSelection();
-    } else {
-      activateClickSelection(chip, { ...c, text: c.value }, 'tree', c.traitId);
-    }
+    handleChipClick(chip, { ...c, text: c.value }, 'tree', c.traitId, e.ctrlKey || e.metaKey);
   });
   return chip;
 }
