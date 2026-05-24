@@ -1,0 +1,150 @@
+{
+  "name": "IAM",
+  "cats": [
+    {
+      "name": "Pharmacodynamique",
+      "id": "c1779637446061",
+      "parentId": null
+    },
+    {
+      "name": "Pharmacocinétique",
+      "id": "c1779637450501",
+      "parentId": null
+    },
+    {
+      "name": "Synergie",
+      "id": "c1779637456533",
+      "parentId": "c1779637446061"
+    },
+    {
+      "name": "Antagonisme",
+      "id": "c1779637461069",
+      "parentId": "c1779637446061"
+    },
+    {
+      "name": "Absroption",
+      "id": "c1779637474718",
+      "parentId": "c1779637450501"
+    },
+    {
+      "name": "Distribution",
+      "id": "c1779637477926",
+      "parentId": "c1779637450501"
+    },
+    {
+      "name": "Elimination",
+      "id": "c1779637484278",
+      "parentId": "c1779637450501"
+    },
+    {
+      "name": "Metabolisme",
+      "id": "c1779637487663",
+      "parentId": "c1779637450501"
+    },
+    {
+      "name": "Icompatibiltés médicamenteuses",
+      "id": "c1779641077838",
+      "parentId": null
+    }
+  ],
+  "words": [
+    {
+      "text": "Solbutamol - théophyline",
+      "catIds": [
+        "c1779637456533"
+      ],
+      "id": "w1779637557953",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "dobutamine / acébutolol",
+      "catIds": [
+        "c1779637461069"
+      ],
+      "id": "w1779637664866",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "gentamicine",
+      "catIds": [
+        "c1779641077838"
+      ],
+      "id": "w1779641094333",
+      "starred": true,
+      "note": ""
+    },
+    {
+      "text": "ampiciline",
+      "catIds": [
+        "c1779641077838"
+      ],
+      "id": "w1779641098750",
+      "starred": true,
+      "note": ""
+    },
+    {
+      "text": "phénytoine",
+      "catIds": [
+        "c1779641077838"
+      ],
+      "id": "w1779641137352",
+      "starred": true,
+      "note": ""
+    },
+    {
+      "text": "solution glucosée",
+      "catIds": [
+        "c1779641077838"
+      ],
+      "id": "w1779641141344",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "phénobarbital",
+      "catIds": [
+        "c1779641077838"
+      ],
+      "id": "w1779641155463",
+      "starred": true,
+      "note": ""
+    },
+    {
+      "text": "héparine",
+      "catIds": [
+        "c1779641077838"
+      ],
+      "id": "w1779641159992",
+      "starred": true,
+      "note": ""
+    },
+    {
+      "text": "amphotéricine B",
+      "catIds": [
+        "c1779641077838"
+      ],
+      "id": "w1779641173681",
+      "starred": true,
+      "note": ""
+    },
+    {
+      "text": "vitamine C",
+      "catIds": [
+        "c1779641077838"
+      ],
+      "id": "w1779641177576",
+      "starred": false,
+      "note": ""
+    }
+  ],
+  "schemaPoints": [],
+  "schemaImageDataUrl": null,
+  "refParams": [],
+  "treeTraits": [],
+  "treeEntities": [],
+  "treeValues": [],
+  "savedAt": "24/05/2026 19:03",
+  "version": 6
+}

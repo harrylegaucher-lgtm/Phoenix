@@ -1,0 +1,402 @@
+{
+  "name": "Sympatho médocs",
+  "cats": [],
+  "words": [],
+  "schemaPoints": [],
+  "schemaImageDataUrl": null,
+  "refParams": [],
+  "treeTraits": [
+    {
+      "id": "tt1779612947152",
+      "name": "molécules"
+    },
+    {
+      "id": "tt1779612956335",
+      "name": "effets"
+    },
+    {
+      "id": "tt1779612959049",
+      "name": "indications"
+    }
+  ],
+  "treeEntities": [
+    {
+      "id": "te1779612934887",
+      "names": [
+        "Noradrénaline"
+      ]
+    },
+    {
+      "id": "te1779612943104",
+      "names": [
+        "a stimulants"
+      ]
+    },
+    {
+      "id": "te1779613309184",
+      "names": [
+        "B stimulants"
+      ]
+    },
+    {
+      "id": "te1779616353196",
+      "names": [
+        "synthèse"
+      ]
+    },
+    {
+      "id": "te1779616381421",
+      "names": [
+        "lib.vésicules"
+      ]
+    },
+    {
+      "id": "te1779616393102",
+      "names": [
+        "élimination"
+      ]
+    },
+    {
+      "id": "te1779616515912",
+      "names": [
+        "lib.récepteurs"
+      ]
+    },
+    {
+      "id": "te1779617134200",
+      "names": [
+        "Adrénaline"
+      ]
+    },
+    {
+      "id": "te1779617136839",
+      "names": [
+        "Dopamine"
+      ]
+    }
+  ],
+  "treeValues": [
+    {
+      "id": "tv17796129668010.38215961664437703",
+      "entityId": "te1779612943104",
+      "traitId": "tt1779612947152",
+      "value": "naphazoline",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796129697600.7040731848198605",
+      "entityId": "te1779612943104",
+      "traitId": "tt1779612947152",
+      "value": "phénylnéphrine",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796129816010.04008795460434533",
+      "entityId": "te1779612943104",
+      "traitId": "tt1779612947152",
+      "value": "Métaraminol",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796129895940.38488566002278224",
+      "entityId": "te1779612943104",
+      "traitId": "tt1779612956335",
+      "value": "vasoconstricteur nasal",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796130006490.45267724314434277",
+      "entityId": "te1779612934887",
+      "traitId": "tt1779612959049",
+      "value": "collapsus cardiaque",
+      "starred": true,
+      "note": "hypotension brusque\n"
+    },
+    {
+      "id": "tv17796130236570.8699690098689359",
+      "entityId": "te1779612934887",
+      "traitId": "tt1779612956335",
+      "value": "vasoconstricteur",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796130499310.21763869405550063",
+      "entityId": "te1779612943104",
+      "traitId": "tt1779612956335",
+      "value": "mydriase",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796133155130.7044412327085504",
+      "entityId": "te1779613309184",
+      "traitId": "tt1779612947152",
+      "value": "dobutamine",
+      "starred": true,
+      "note": "B1\nchoc cardiogénique\n"
+    },
+    {
+      "id": "tv17796133188340.15061154272807165",
+      "entityId": "te1779613309184",
+      "traitId": "tt1779612947152",
+      "value": "salbutamol",
+      "starred": true,
+      "note": "B2\nasthme\nTocolytine (menace d'avort)\n"
+    },
+    {
+      "id": "tv17796133212250.8367343383205408",
+      "entityId": "te1779613309184",
+      "traitId": "tt1779612947152",
+      "value": "isoprénaline",
+      "starred": true,
+      "note": "B1 B2\nBAV\n"
+    },
+    {
+      "id": "tv17796134485320.04595756280935137",
+      "entityId": "te1779612934887",
+      "traitId": "tt1779612956335",
+      "value": "bradychardie réflexe",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796163986930.13058016120534888",
+      "entityId": "te1779616393102",
+      "traitId": "tt1779612947152",
+      "value": "IMAO",
+      "starred": true,
+      "note": "effet hypotenseur de mécanisme inconnu\n"
+    },
+    {
+      "id": "tv17796164330620.696084967306623",
+      "entityId": "te1779616393102",
+      "traitId": "tt1779612947152",
+      "value": "antidépresseurs imipraminiques",
+      "starred": true,
+      "note": "effet hypotenseur par bloacage post synaptique\n"
+    },
+    {
+      "id": "tv17796164374870.8646889553099526",
+      "entityId": "te1779616393102",
+      "traitId": "tt1779612947152",
+      "value": "cocaine",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796165261130.23656910209985238",
+      "entityId": "te1779616353196",
+      "traitId": "tt1779612947152",
+      "value": "L-dopa",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796165704250.4478646632141151",
+      "entityId": "te1779616381421",
+      "traitId": "tt1779612947152",
+      "value": "tyramine",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796165729940.42122625317344675",
+      "entityId": "te1779616381421",
+      "traitId": "tt1779612947152",
+      "value": "amphétamine",
+      "starred": true,
+      "note": "stimulant vigilance\n"
+    },
+    {
+      "id": "tv17796165751860.6266586555831456",
+      "entityId": "te1779616381421",
+      "traitId": "tt1779612947152",
+      "value": "éphédrine",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796166219940.35318653262968447",
+      "entityId": "te1779616381421",
+      "traitId": "tt1779612959049",
+      "value": "rhinite",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796166290750.07355044736244687",
+      "entityId": "te1779616381421",
+      "traitId": "tt1779612956335",
+      "value": "vasoconstricter local",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796166517490.3513096369179578",
+      "entityId": "te1779616353196",
+      "traitId": "tt1779612959049",
+      "value": "maladie de parkinson",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796167267020.911060101282661",
+      "entityId": "te1779616515912",
+      "traitId": "tt1779612947152",
+      "value": "yohimbine phentolamine",
+      "starred": true,
+      "note": "faible dose\n"
+    },
+    {
+      "id": "tv17796170094120.5852560209012291",
+      "entityId": "te1779613309184",
+      "traitId": "tt1779612959049",
+      "value": "BAV",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796170214370.29825066238544995",
+      "entityId": "te1779613309184",
+      "traitId": "tt1779612959049",
+      "value": "choc cardiogénique",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796170521980.49944276174435864",
+      "entityId": "te1779613309184",
+      "traitId": "tt1779612959049",
+      "value": "Astme - menace d'avortement",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796171584400.3140042999767255",
+      "entityId": "te1779617134200",
+      "traitId": "tt1779612947152",
+      "value": "0.1",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796171598890.1432980708210323",
+      "entityId": "te1779617134200",
+      "traitId": "tt1779612947152",
+      "value": "10",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796171636320.8073593929120506",
+      "entityId": "te1779617136839",
+      "traitId": "tt1779612947152",
+      "value": "2-5",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796171662400.07776467873802795",
+      "entityId": "te1779617136839",
+      "traitId": "tt1779612947152",
+      "value": "5-20",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796171683770.8077670341665186",
+      "entityId": "te1779617136839",
+      "traitId": "tt1779612947152",
+      "value": "+20",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796172085060.946766800456882",
+      "entityId": "te1779617134200",
+      "traitId": "tt1779612956335",
+      "value": "a B hypertenseur",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796172186190.9723281345915215",
+      "entityId": "te1779617136839",
+      "traitId": "tt1779612956335",
+      "value": "vasodilatation rénale",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796172346830.46077554604593485",
+      "entityId": "te1779617136839",
+      "traitId": "tt1779612956335",
+      "value": "B1 cardiostimulant",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796172436190.006028985817582488",
+      "entityId": "te1779617136839",
+      "traitId": "tt1779612956335",
+      "value": "a vasoconstriction",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796172516900.11122735453594157",
+      "entityId": "te1779617134200",
+      "traitId": "tt1779612959049",
+      "value": "choc anaphylactique",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796172674540.8423837291684733",
+      "entityId": "te1779617136839",
+      "traitId": "tt1779612959049",
+      "value": "choc cardiogénique",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796174502160.8908184922575396",
+      "entityId": "te1779617134200",
+      "traitId": "tt1779612959049",
+      "value": "glaucome angle ouver",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796174589600.4989750460020054",
+      "entityId": "te1779617134200",
+      "traitId": "tt1779612956335",
+      "value": "B2 hypotenseur",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796176758210.507337520532288",
+      "entityId": "te1779612943104",
+      "traitId": "tt1779612947152",
+      "value": "noradrénaline",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796179566290.4793286205744366",
+      "entityId": "te1779616381421",
+      "traitId": "tt1779612956335",
+      "value": "bronchodilatation",
+      "starred": false,
+      "note": ""
+    }
+  ],
+  "savedAt": "24/05/2026 11:20",
+  "version": 6
+}

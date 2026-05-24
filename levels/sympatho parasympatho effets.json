@@ -1,0 +1,192 @@
+{
+  "name": "sympatho parasympatho effets",
+  "cats": [],
+  "words": [],
+  "schemaPoints": [],
+  "schemaImageDataUrl": null,
+  "refParams": [],
+  "treeTraits": [
+    {
+      "id": "tt1779608132448",
+      "name": "Oeil"
+    },
+    {
+      "id": "tt1779608137456",
+      "name": "Coeur"
+    },
+    {
+      "id": "tt1779608141232",
+      "name": "Bronches"
+    },
+    {
+      "id": "tt1779608145673",
+      "name": "Vaisseaux"
+    },
+    {
+      "id": "tt1779608160769",
+      "name": "glandes(salivaire,digestive)"
+    },
+    {
+      "id": "tt1779608176210",
+      "name": "Glande surrénale / Foie"
+    },
+    {
+      "id": "tt1779608259716",
+      "name": "transit intestinal"
+    },
+    {
+      "id": "tt1779608263763",
+      "name": "miction"
+    },
+    {
+      "id": "tt1779608564114",
+      "name": "utéruse"
+    }
+  ],
+  "treeEntities": [
+    {
+      "id": "te1779608124304",
+      "names": [
+        "Sympathique"
+      ]
+    },
+    {
+      "id": "te1779608127607",
+      "names": [
+        "Parasymathique"
+      ]
+    }
+  ],
+  "treeValues": [
+    {
+      "id": "tv17796081822340.7020586103632395",
+      "entityId": "te1779608124304",
+      "traitId": "tt1779608132448",
+      "value": "Mydriase",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796081871300.9178447721346459",
+      "entityId": "te1779608124304",
+      "traitId": "tt1779608137456",
+      "value": "tachychardie",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796082020820.9448808133338363",
+      "entityId": "te1779608124304",
+      "traitId": "tt1779608141232",
+      "value": "bronchodilatation",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796082095380.042239673649369425",
+      "entityId": "te1779608127607",
+      "traitId": "tt1779608141232",
+      "value": "bronchoconstriction",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796082151230.3371804885377597",
+      "entityId": "te1779608124304",
+      "traitId": "tt1779608145673",
+      "value": "vasoconstriction",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796082301710.35309925370683215",
+      "entityId": "te1779608127607",
+      "traitId": "tt1779608145673",
+      "value": "vasodilatation(MO)",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796082360600.8372645238707647",
+      "entityId": "te1779608127607",
+      "traitId": "tt1779608137456",
+      "value": "bradychardie",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796082399790.5629234814278928",
+      "entityId": "te1779608127607",
+      "traitId": "tt1779608132448",
+      "value": "Myosis",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796082721220.08950316589760388",
+      "entityId": "te1779608127607",
+      "traitId": "tt1779608160769",
+      "value": "stimule",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796082745470.9436557967476493",
+      "entityId": "te1779608124304",
+      "traitId": "tt1779608160769",
+      "value": "inhibe",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796082793550.8963596088901801",
+      "entityId": "te1779608124304",
+      "traitId": "tt1779608176210",
+      "value": "stimule",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796082901320.3977212676879712",
+      "entityId": "te1779608124304",
+      "traitId": "tt1779608259716",
+      "value": "inhibe",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796082949500.9010553268586429",
+      "entityId": "te1779608127607",
+      "traitId": "tt1779608259716",
+      "value": "stimule",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796082997320.4490023960914996",
+      "entityId": "te1779608124304",
+      "traitId": "tt1779608263763",
+      "value": "inhibe",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796083031240.5073802686515363",
+      "entityId": "te1779608127607",
+      "traitId": "tt1779608263763",
+      "value": "stimule",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "id": "tv17796085736280.29001596880076974",
+      "entityId": "te1779608124304",
+      "traitId": "tt1779608564114",
+      "value": "contraction",
+      "starred": false,
+      "note": ""
+    }
+  ],
+  "savedAt": "24/05/2026 08:45",
+  "version": 6
+}
