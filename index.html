@@ -1287,7 +1287,16 @@ function renderClassifyNotes() {
       <span class="tree-note-arrow" id="cla-arrow-${w.id}">▶</span>
     `;
     const body = document.createElement('div'); body.className='tree-note-body';
-    body.textContent = w.note || '(aucune note)';
+    const ta = document.createElement('textarea');
+    ta.placeholder='Écrivez votre note ici...';
+    ta.value = w.note || '';
+    ta.style.cssText='width:100%;min-height:64px;resize:vertical;font-size:12px;font-family:var(--font-body);border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);padding:7px 10px;outline:none;background:var(--surface);color:var(--ink);box-sizing:border-box;margin-top:2px;';
+    ta.addEventListener('focus', ()=>{ ta.style.borderColor='var(--accent)'; });
+    ta.addEventListener('blur',  ()=>{ ta.style.borderColor='var(--border-strong)'; });
+    ta.addEventListener('input', ()=>{ w.note = ta.value; });
+    ta.addEventListener('click', e=>e.stopPropagation());
+    ta.addEventListener('keydown', e=>e.stopPropagation());
+    body.appendChild(ta);
     trigger.addEventListener('click', ()=>{
       const isOpen = body.classList.contains('open');
       body.classList.toggle('open', !isOpen);
@@ -2395,17 +2404,25 @@ function initTreePlay() {
           ? `background:${entityColor}18;border-color:${entityColor};color:${entityColor};`
           : `background:#fde8e8;border-color:#d44d4d;color:#a32d2d;`;
         placed.textContent = chip.value;
+        // Check if any treeValue for this chip has a note
+        const tvNote = treeValues.find(v=>v.traitId===chip.traitId && v.value===chip.value && v.starred && v.note);
 
         if(correct){
-          rem.splice(matchIdx, 1); // consume the slot
-          placed.title='Cliquer pour annuler';
-          placed.addEventListener('click', ()=>{
-            placed.remove(); treeScore--;
-            document.getElementById('tree-score').textContent=treeScore;
-            rem.push(chip.value);
-            poolEl.appendChild(makeTreeChip(chip, col));
-            setTreeFeedback(`"${chip.value}" remis dans la liste.`,'info');
-          });
+          rem.splice(matchIdx, 1);
+          if(tvNote) {
+            placed.innerHTML=chip.value+`<span style="font-size:8px;vertical-align:super;font-weight:800;margin-left:2px;">*</span>`;
+            placed.title='Cliquer pour voir la note';
+            placed.addEventListener('click', ()=>{ openTreeNotePopup(tvNote, placed, entityColor); });
+          } else {
+            placed.title='Cliquer pour annuler';
+            placed.addEventListener('click', ()=>{
+              placed.remove(); treeScore--;
+              document.getElementById('tree-score').textContent=treeScore;
+              rem.push(chip.value);
+              poolEl.appendChild(makeTreeChip(chip, col));
+              setTreeFeedback(`"${chip.value}" remis dans la liste.`,'info');
+            });
+          }
           dropZone.appendChild(placed); src.remove();
           treeScore++; document.getElementById('tree-score').textContent=treeScore; recordCorrect('tree'); if(treeScore===scoreState['tree'].total){stopScoreTimer('tree');saveSessionToHistory('tree');}
           setTreeFeedback(`✓ "${chip.value}" appartient bien à ${entityPrimaryName(entity)} !`,'ok');
@@ -2434,10 +2451,31 @@ function initTreePlay() {
 function makeTreeChip(c, col) {
   const chip = document.createElement('span'); chip.className='tree-play-chip';
   if(col) chip.style.cssText=`border-color:${col}66;`;
-  chip.textContent=c.value; chip.draggable=true; chip.dataset.chipId=c.chipId;
+  chip.draggable=true; chip.dataset.chipId=c.chipId;
+  // Find the treeValue to check starred
+  const tv = treeValues.find(v=>v.traitId===c.traitId && v.value===c.value && v.starred && v.note);
+  if(tv) {
+    chip.innerHTML=c.value+`<span style="font-size:8px;vertical-align:super;font-weight:800;margin-left:2px;opacity:.7;">*</span>`;
+    chip.title='* Note disponible — placer pour révéler';
+  } else {
+    chip.textContent=c.value;
+  }
   chip.addEventListener('dragstart',e=>{ e.dataTransfer.setData('text/plain',c.chipId); setTimeout(()=>chip.classList.add('dragging'),0); });
   chip.addEventListener('dragend',()=>chip.classList.remove('dragging'));
   return chip;
+}
+
+function openTreeNotePopup(tv, anchorEl, col) {
+  document.querySelectorAll('.tree-note-popup').forEach(el=>el.remove());
+  const pop = document.createElement('div'); pop.className='tree-note-popup';
+  const rect = anchorEl.getBoundingClientRect();
+  pop.style.cssText=`position:fixed;z-index:300;background:var(--surface);border:1.5px solid ${col};border-radius:var(--radius-sm);padding:12px 14px;box-shadow:var(--shadow-lg);max-width:260px;font-size:12px;color:var(--ink2);font-family:var(--font-body);line-height:1.6;top:${Math.min(rect.bottom+6,window.innerHeight-160)}px;left:${Math.min(rect.left,window.innerWidth-276)}px;`;
+  pop.innerHTML=`<div style="font-family:var(--font-display);font-size:11px;font-weight:700;color:${col};margin-bottom:6px;">${tv.value}</div>${tv.note}`;
+  document.body.appendChild(pop);
+  setTimeout(()=>{
+    const close = e=>{ if(!pop.contains(e.target)){ pop.remove(); document.removeEventListener('click',close); } };
+    document.addEventListener('click', close);
+  }, 0);
 }
 
 function setTreeFeedback(msg,type){
@@ -2537,7 +2575,18 @@ function renderTreeNotes() {
       <span class="tree-note-arrow" id="arrow-${v.id}">▶</span>
     `;
     const body = document.createElement('div'); body.className='tree-note-body';
-    body.textContent = v.note || '(aucune note)';
+    // Editable textarea directly in the accordion
+    const ta = document.createElement('textarea');
+    ta.className='tree-note-textarea';
+    ta.placeholder='Écrivez votre note ici...';
+    ta.value = v.note || '';
+    ta.style.cssText='width:100%;min-height:64px;resize:vertical;font-size:12px;font-family:var(--font-body);border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);padding:7px 10px;outline:none;background:var(--surface);color:var(--ink);box-sizing:border-box;margin-top:2px;';
+    ta.addEventListener('focus', ()=>{ ta.style.borderColor=col; });
+    ta.addEventListener('blur',  ()=>{ ta.style.borderColor='var(--border-strong)'; });
+    ta.addEventListener('input', ()=>{ v.note = ta.value; });
+    ta.addEventListener('click', e=>e.stopPropagation());
+    ta.addEventListener('keydown', e=>e.stopPropagation());
+    body.appendChild(ta);
     trigger.addEventListener('click', ()=>{
       const isOpen = body.classList.contains('open');
       body.classList.toggle('open', !isOpen);
