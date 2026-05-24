@@ -2107,7 +2107,7 @@ function addTreeTrait() {
   const name = inp.value.trim(); if(!name) return;
   treeTraits.push({ id:'tt'+Date.now(), name });
   inp.value=''; renderTreeTable();
-  document.getElementById('tree-entity-input').focus();
+  inp.focus();
 }
 
 function addTreeEntity() {
