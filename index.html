@@ -211,7 +211,7 @@
 
   /* ======= MODE ARBRE ======= */
 
-  .tree-table { border-collapse:collapse; width:100%; min-width:500px; touch-action:pan-x pan-y; }
+  .tree-table { border-collapse:collapse; width:auto; touch-action:pan-x pan-y; }
   .tree-table th { font-family:var(--font-display); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; padding:8px 12px; background:var(--surface2); border:1px solid var(--border-strong); color:var(--ink2); white-space:nowrap; }
   .tree-table th.entity-col { color:var(--ink); }
   .tree-table th.trait-col { text-align:center; }
@@ -2452,6 +2452,10 @@ function renderTreeTable() {
     tbody.appendChild(tr);
   });
   table.appendChild(tbody);
+  // Force explicit pixel min-width so Safari iOS recognises the overflow and enables scroll
+  // Entity col ≈ 160px + each trait col ≈ 150px
+  const minW = 160 + treeTraits.length * 150;
+  table.style.minWidth = Math.max(minW, 400) + 'px';
   wrap.appendChild(table);
   renderTreeNotes();
 }
@@ -3357,5 +3361,5 @@ if('serviceWorker' in navigator) {
 })();
 
 </script>
-<div id="patch-badge" style="position:fixed;bottom:10px;right:12px;font-family:var(--font-body);font-size:10px;color:var(--ink3);opacity:.35;pointer-events:none;z-index:9999;letter-spacing:.4px;">patch 8</div>
+<div id="patch-badge" style="position:fixed;bottom:10px;right:12px;font-family:var(--font-body);font-size:10px;color:var(--ink3);opacity:.35;pointer-events:none;z-index:9999;letter-spacing:.4px;">patch 9</div>
 </body>
