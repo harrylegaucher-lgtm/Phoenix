@@ -104,6 +104,7 @@
   .tree-play-drop-zone.click-target:hover{border-color:var(--accent)!important;background:var(--accent-light);cursor:pointer;}
   .click-mode-hint{font-size:12px;color:var(--accent);font-weight:600;padding:6px 12px;background:var(--accent-light);border-radius:var(--radius-sm);display:inline-flex;align-items:center;gap:6px;animation:pulse-hint .8s ease infinite alternate;}
   @keyframes pulse-hint{from{opacity:.7;}to{opacity:1;}}
+  .multi-select-btn.active{background:var(--ink)!important;border-color:var(--ink)!important;color:#fff!important;}
 
   /* WORD POOL */
   .pool-label{font-family:var(--font-display);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--ink3);margin-bottom:10px;}
@@ -596,14 +597,16 @@
     </div>
 
     <div id="play-panel" class="panel">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
         <p class="pool-label" style="margin:0;">Mots à placer</p>
-        <div style="position:relative;flex:1;max-width:260px;">
+        <div style="position:relative;flex:1;max-width:220px;">
           <input type="text" id="play-search" placeholder="🔍 Filtrer les mots..."
             style="width:100%;height:34px;font-size:13px;padding:0 10px 0 32px;border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);outline:none;font-family:var(--font-body);"
             oninput="filterPlayPool(this.value)" />
           <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;opacity:.4;pointer-events:none;">🔍</span>
         </div>
+        <button class="btn multi-select-btn" onclick="toggleMultiSelect()"
+          style="height:34px;padding:0 14px;font-size:12px;font-weight:700;border-radius:var(--radius-sm);border:1.5px solid var(--border-strong);background:var(--surface);color:var(--ink2);cursor:pointer;white-space:nowrap;">⊕ Multi</button>
       </div>
       <div id="word-pool"></div>
       <div class="sandbox" id="sandbox-play"></div>
@@ -797,8 +800,12 @@
 
     <!-- TREE PLAY -->
     <div id="tree-play-panel" class="panel">
-      <div style="font-size:12px;color:var(--ink2);margin-bottom:14px;">
-        Chaque section contient les valeurs d'un trait mélangées entre toutes les entités. Glissez chaque valeur vers la bonne entité.
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+        <div style="font-size:12px;color:var(--ink2);">
+          Chaque section contient les valeurs d'un trait mélangées entre toutes les entités. Glissez chaque valeur vers la bonne entité.
+        </div>
+        <button class="btn multi-select-btn" onclick="toggleMultiSelect()"
+          style="height:34px;padding:0 14px;font-size:12px;font-weight:700;border-radius:var(--radius-sm);border:1.5px solid var(--border-strong);background:var(--surface);color:var(--ink2);cursor:pointer;white-space:nowrap;flex-shrink:0;">⊕ Multi</button>
       </div>
       <div id="tree-play-sections"></div>
       <div class="score-panel" style="margin-top:20px;">
@@ -848,6 +855,16 @@ let schemaScore = 0;
 // ── CLICK-TO-PLACE STATE ─────────────────────────────────────────
 // selectedChips: array of { chipEl, chipData, mode:'classify'|'tree', traitId? }
 let selectedChips = [];
+let multiSelectMode = false;
+
+function toggleMultiSelect() {
+  multiSelectMode = !multiSelectMode;
+  document.querySelectorAll('.multi-select-btn').forEach(btn => {
+    btn.classList.toggle('active', multiSelectMode);
+    btn.textContent = multiSelectMode ? '☑ Multi ON' : '⊕ Multi';
+  });
+  if(!multiSelectMode) clearClickSelection();
+}
 
 function clearClickSelection() {
   selectedChips.forEach(s => s.chipEl && s.chipEl.classList.remove('chip-selected'));
@@ -888,8 +905,9 @@ function updateSelectionHint() {
 
 // Call this on every chip click (makePoolChip, makeTreeChip)
 function handleChipClick(chipEl, chipData, mode, traitId, ctrlKey) {
+  const isMulti = ctrlKey || multiSelectMode;
   const existIdx = selectedChips.findIndex(s => s.chipEl === chipEl);
-  if(ctrlKey) {
+  if(isMulti) {
     // Toggle this chip in the multi-selection
     if(existIdx !== -1) {
       // Deselect this one
@@ -907,7 +925,6 @@ function handleChipClick(chipEl, chipData, mode, traitId, ctrlKey) {
   } else {
     // Single click: if already the only selected chip → deselect; otherwise select only this one
     if(existIdx !== -1 && selectedChips.length === 1) {
-      // Deselect
       clearClickSelection(); return;
     }
     clearClickSelection();
@@ -992,6 +1009,8 @@ function switchMode(m) {
 // =====================================================
 function setPhase(p) {
   clearClickSelection();
+  multiSelectMode = false;
+  document.querySelectorAll('.multi-select-btn').forEach(b=>{ b.classList.remove('active'); b.textContent='⊕ Multi'; });
   document.getElementById('btn-setup').classList.toggle('active', p==='setup');
   document.getElementById('btn-play').classList.toggle('active', p==='play');
   document.getElementById('setup-panel').classList.toggle('active', p==='setup');
@@ -2297,6 +2316,8 @@ const treeColor = i => TREE_COLORS[i % TREE_COLORS.length];
 
 function setTreePhase(p) {
   clearClickSelection();
+  multiSelectMode = false;
+  document.querySelectorAll('.multi-select-btn').forEach(b=>{ b.classList.remove('active'); b.textContent='⊕ Multi'; });
   document.getElementById('btn-tree-setup').classList.toggle('active', p==='setup');
   document.getElementById('btn-tree-play').classList.toggle('active', p==='play');
   document.getElementById('tree-setup-panel').classList.toggle('active', p==='setup');
@@ -2445,6 +2466,9 @@ function openCellEditor(entityId, traitId, col, tdEl) {
   const leftPos = Math.min(rect.left, window.innerWidth - 296);
   editor.style.top  = topPos + 'px';
   editor.style.left = leftPos + 'px';
+  // Stop clicks/touches inside the editor from bubbling to document (critical for iOS)
+  editor.addEventListener('click',    e => e.stopPropagation());
+  editor.addEventListener('touchend', e => e.stopPropagation());
 
   const inp = document.createElement('input');
   inp.type='text'; inp.placeholder='Ajouter une valeur...';
@@ -2493,7 +2517,9 @@ function openCellEditor(entityId, traitId, col, tdEl) {
 function closeCellEditor() {
   if(activeCellEditor){ activeCellEditor.el.remove(); activeCellEditor=null; }
 }
-document.addEventListener('click', ()=>closeCellEditor());
+document.addEventListener('click', e => {
+  if(activeCellEditor && !activeCellEditor.el.contains(e.target)) closeCellEditor();
+});
 // Clear chip click-selection when clicking outside relevant zones
 document.addEventListener('click', e => {
   if(!selectedChips.length) return;
