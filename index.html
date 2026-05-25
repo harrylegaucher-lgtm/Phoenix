@@ -211,7 +211,7 @@
 
   /* ======= MODE ARBRE ======= */
 
-  .tree-table { border-collapse:collapse; width:100%; min-width:500px; }
+  .tree-table { border-collapse:collapse; width:100%; min-width:500px; touch-action:pan-x pan-y; }
   .tree-table th { font-family:var(--font-display); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; padding:8px 12px; background:var(--surface2); border:1px solid var(--border-strong); color:var(--ink2); white-space:nowrap; }
   .tree-table th.entity-col { color:var(--ink); }
   .tree-table th.trait-col { text-align:center; }
@@ -790,7 +790,7 @@
         </div>
       </div>
       <!-- The table -->
-      <div id="tree-table-wrap" style="overflow-x:auto;"></div>
+      <div id="tree-table-wrap" style="overflow-x:scroll;-webkit-overflow-scrolling:touch;touch-action:pan-x;"></div>
       <p class="hint" style="margin-top:14px;">Les traits sont partagés entre toutes les entités. Cliquez sur une cellule pour ajouter/modifier les valeurs de cette entité pour ce trait.<br>Préfixez une valeur avec <strong>*</strong> pour lui associer une note (ex: <em>*Candida Auris</em>).</p>
       <div class="tree-notes-section" id="tree-notes-section" style="display:none;">
         <div class="tree-notes-title">Notes <span id="tree-notes-count" style="font-weight:400;opacity:.6;"></span></div>
