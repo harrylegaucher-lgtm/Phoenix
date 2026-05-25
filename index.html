@@ -3264,6 +3264,8 @@ if('serviceWorker' in navigator) {
       el.classList.add('dragging');
       createGhost(el, startX, startY);
       started = true;
+      // Attach the non-passive move listener ONLY now that drag has started
+      document.addEventListener('touchmove', onDragMove, { passive:false });
       e.preventDefault();
     };
 
@@ -3282,7 +3284,10 @@ if('serviceWorker' in navigator) {
   }
 
   // ── Global touchmove: move ghost + highlight drop zone ─────────────────
-  document.addEventListener('touchmove', function(e) {
+  // CRITICAL: this listener is passive:false (needs preventDefault to block page scroll during drag)
+  // BUT it must only exist while a drag is active — a permanent passive:false listener on document
+  // blocks native scroll in ALL child elements on Safari iOS even when preventDefault is never called.
+  function onDragMove(e) {
     if(!dragState) return;
     const touch = e.touches[0];
     moveGhost(touch.clientX, touch.clientY);
@@ -3300,11 +3305,14 @@ if('serviceWorker' in navigator) {
       lastOverZone = zone;
     }
     e.preventDefault();
-  }, { passive:false });
+  }
 
   // ── Global touchend: fire drop ─────────────────────────────────────────
   document.addEventListener('touchend', function(e) {
     if(!dragState) return;
+    // Remove the drag-move listener as soon as touch ends
+    document.removeEventListener('touchmove', onDragMove);
+
     const touch = e.changedTouches[0];
     const target = hitTest(touch.clientX, touch.clientY);
     const zone = findDropZone(target);
@@ -3323,7 +3331,6 @@ if('serviceWorker' in navigator) {
     if(dragState.element) dragState.element.classList.remove('dragging');
     removeGhost();
     document.querySelectorAll('.over,.drop-over,.setup-over').forEach(el=>el.classList.remove('over','drop-over','setup-over'));
-    // Fire dragend
     if(dragState.element) {
       (dragState.element._dragEndHandlers||[]).forEach(h=>h.call(dragState.element,{}));
     }
@@ -3358,5 +3365,5 @@ if('serviceWorker' in navigator) {
 })();
 
 </script>
-<div id="patch-badge" style="position:fixed;bottom:10px;right:12px;font-family:var(--font-body);font-size:10px;color:var(--ink3);opacity:.35;pointer-events:none;z-index:9999;letter-spacing:.4px;">patch 9</div>
+<div id="patch-badge" style="position:fixed;bottom:10px;right:12px;font-family:var(--font-body);font-size:10px;color:var(--ink3);opacity:.35;pointer-events:none;z-index:9999;letter-spacing:.4px;">patch 10</div>
 </body>
