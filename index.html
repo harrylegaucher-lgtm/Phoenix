@@ -3366,4 +3366,110 @@ if('serviceWorker' in navigator) {
 
 </script>
 <div id="patch-badge" style="position:fixed;bottom:10px;right:12px;font-family:var(--font-body);font-size:10px;color:var(--ink3);opacity:.35;pointer-events:none;z-index:9999;letter-spacing:.4px;">patch 10</div>
+
+<!-- ── DEBUG OVERLAY ───────────────────────────────────────────── -->
+<div id="dbg" style="display:none;position:fixed;bottom:50px;right:8px;width:280px;max-height:55vh;overflow-y:auto;background:rgba(0,0,0,.88);color:#0f0;font:11px/1.5 monospace;padding:10px 12px;border-radius:10px;z-index:99999;box-shadow:0 4px 24px #0008;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+    <span style="color:#fff;font-weight:700;font-size:12px;">🛠 Debug scroll</span>
+    <button onclick="document.getElementById('dbg').style.display='none'" style="background:#fff2;border:none;color:#fff;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:11px;">×</button>
+  </div>
+  <div id="dbg-body" style="display:flex;flex-direction:column;gap:3px;"></div>
+  <button onclick="dbgClear()" style="margin-top:6px;background:#fff2;border:none;color:#aaa;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:10px;width:100%;">Effacer logs</button>
+</div>
+<button id="dbg-toggle" onclick="dbgToggle()" style="display:none;position:fixed;bottom:50px;right:8px;background:#111;color:#0f0;border:none;border-radius:8px;padding:6px 12px;font:700 11px monospace;cursor:pointer;z-index:99999;box-shadow:0 2px 8px #0006;">🛠 Debug</button>
+
+<script>
+(function(){
+  // ── Toggle visibility ───────────────────────────────────────────
+  const panel = document.getElementById('dbg');
+  const btn   = document.getElementById('dbg-toggle');
+  const body  = document.getElementById('dbg-body');
+
+  // Show debug button always (can be hidden after diagnosis)
+  btn.style.display = 'block';
+
+  window.dbgToggle = function() {
+    const visible = panel.style.display !== 'none';
+    panel.style.display = visible ? 'none' : 'block';
+    btn.style.bottom    = visible ? '50px' : (panel.offsetHeight + 60) + 'px';
+    if(!visible) dbgRefresh();
+  };
+  window.dbgClear = function() { body.innerHTML = ''; };
+
+  function row(label, val, color) {
+    const d = document.createElement('div');
+    d.style.color = color || '#0f0';
+    d.textContent = label + ': ' + val;
+    body.insertBefore(d, body.firstChild);
+    // Keep max 40 lines
+    while(body.children.length > 40) body.removeChild(body.lastChild);
+  }
+
+  // ── Static info about the table wrap ───────────────────────────
+  function dbgRefresh() {
+    const wrap  = document.getElementById('tree-table-wrap');
+    const table = wrap ? wrap.querySelector('table') : null;
+    row('── REFRESH ──', new Date().toLocaleTimeString(), '#888');
+    if(!wrap) { row('tree-table-wrap', 'NOT FOUND', '#f66'); return; }
+    const ws = getComputedStyle(wrap);
+    row('wrap.offsetWidth',   wrap.offsetWidth + 'px');
+    row('wrap.scrollWidth',   wrap.scrollWidth + 'px');
+    row('wrap.scrollLeft',    wrap.scrollLeft  + 'px');
+    row('wrap.overflowX',     ws.overflowX);
+    row('wrap.webkitOverflowScrolling', ws.webkitOverflowScrolling || '(none)');
+    row('wrap.touchAction',   ws.touchAction   || '(none)');
+    if(table) {
+      row('table.offsetWidth', table.offsetWidth + 'px');
+      row('table.whiteSpace',  getComputedStyle(table).whiteSpace);
+      row('overflow?', wrap.scrollWidth > wrap.offsetWidth ? '✅ YES ('+( wrap.scrollWidth - wrap.offsetWidth)+'px)' : '❌ NO', wrap.scrollWidth > wrap.offsetWidth ? '#0f0' : '#f66');
+    } else {
+      row('table', 'NOT FOUND', '#f66');
+    }
+    // Check parent overflow chain
+    let el = wrap.parentElement; let depth = 0;
+    while(el && el !== document.body && depth < 5) {
+      const s = getComputedStyle(el);
+      if(s.overflow !== 'visible' || s.overflowX !== 'visible') {
+        row('parent['+depth+'].id',   el.id || el.className.slice(0,20));
+        row('parent['+depth+'].overflow', s.overflow + ' / ' + s.overflowX, '#fa0');
+      }
+      el = el.parentElement; depth++;
+    }
+    // Touch event listeners (can't enumerate, but check dragState)
+    row('touchmove listeners', 'see below', '#888');
+  }
+  window.dbgRefresh = dbgRefresh;
+
+  // ── Live touch event logging ────────────────────────────────────
+  document.addEventListener('touchstart', function(e) {
+    if(panel.style.display === 'none') return;
+    const wrap = document.getElementById('tree-table-wrap');
+    const inside = wrap && wrap.contains(e.target);
+    row('touchstart' + (inside ? ' [INSIDE WRAP]':''), 
+        'x='+Math.round(e.touches[0].clientX)+' target='+e.target.tagName+(e.target.id?'#'+e.target.id:''),
+        inside ? '#ff0' : '#888');
+  }, { passive:true });
+
+  document.addEventListener('touchmove', function(e) {
+    if(panel.style.display === 'none') return;
+    const wrap = document.getElementById('tree-table-wrap');
+    row('touchmove', 
+        'scroll='+wrap?.scrollLeft?.toFixed(0)+' passive='+(!e.cancelable ? '✅yes':'❌NO—can prevent!'),
+        !e.cancelable ? '#0f0' : '#f66');
+  }, { passive:true });
+
+  document.addEventListener('touchend', function(e) {
+    if(panel.style.display === 'none') return;
+    const wrap = document.getElementById('tree-table-wrap');
+    row('touchend scrollLeft=', wrap?.scrollLeft?.toFixed(0)+'px', '#0af');
+  }, { passive:true });
+
+  // ── Poll scroll position ────────────────────────────────────────
+  setInterval(function() {
+    if(panel.style.display === 'none') return;
+    const wrap = document.getElementById('tree-table-wrap');
+    if(wrap && wrap.scrollLeft > 0) row('✅ SCROLL WORKS! scrollLeft='+wrap.scrollLeft, '', '#0f0');
+  }, 300);
+})();
+</script>
 </body>
