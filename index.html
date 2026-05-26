@@ -373,11 +373,9 @@
 
 
   /* ── PWA / Touch ──────────────────────────────────────────────── */
-  * { -webkit-tap-highlight-color: transparent; touch-action: pan-y; }
+  * { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
   body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; padding-bottom: env(safe-area-inset-bottom); }
-  /* overflow-x:clip on panels prevents ancestors from expanding with wide tables
-     without creating a scroll container (unlike hidden) — no touch-action side effect */
-  #tree-panel, #tree-setup-panel { overflow-x: clip; }
+  #tree-panel, #tree-setup-panel { overflow-x: visible; }
   header { padding-top: max(22px, env(safe-area-inset-top)); }
   /* Touch drag ghost */
   #touch-drag-ghost {
@@ -3368,7 +3366,7 @@ if('serviceWorker' in navigator) {
 })();
 
 </script>
-<div id="patch-badge" style="position:fixed;bottom:10px;right:12px;font-family:var(--font-body);font-size:10px;color:var(--ink3);opacity:.35;pointer-events:none;z-index:9999;letter-spacing:.4px;">patch 12</div>
+<div id="patch-badge" style="position:fixed;bottom:10px;right:12px;font-family:var(--font-body);font-size:10px;color:var(--ink3);opacity:.35;pointer-events:none;z-index:9999;letter-spacing:.4px;">patch 13</div>
 
 <!-- ── DEBUG OVERLAY ───────────────────────────────────────────── -->
 <div id="dbg" style="display:none;position:fixed;bottom:50px;right:8px;width:280px;max-height:55vh;overflow-y:auto;background:rgba(0,0,0,.88);color:#0f0;font:11px/1.5 monospace;padding:10px 12px;border-radius:10px;z-index:99999;box-shadow:0 4px 24px #0008;">
