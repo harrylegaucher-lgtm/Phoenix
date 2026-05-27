@@ -102,6 +102,7 @@
   .tree-play-chip.chip-selected{background:var(--ink);border-color:var(--ink)!important;color:#fff;transform:scale(1.08);box-shadow:0 0 0 3px var(--accent-light);cursor:pointer;}
   .cat-card.click-target:hover{border-color:var(--accent)!important;background:var(--accent-light);cursor:pointer;}
   .tree-play-drop-zone.click-target:hover{border-color:var(--accent)!important;background:var(--accent-light);cursor:pointer;}
+  .play-dot.click-target{box-shadow:0 0 0 5px var(--accent-light),0 2px 8px rgba(0,0,0,.35)!important;cursor:pointer;}
   .click-mode-hint{font-size:12px;color:var(--accent);font-weight:600;padding:6px 12px;background:var(--accent-light);border-radius:var(--radius-sm);display:inline-flex;align-items:center;gap:6px;animation:pulse-hint .8s ease infinite alternate;}
   @keyframes pulse-hint{from{opacity:.7;}to{opacity:1;}}
   .multi-select-btn.active{background:var(--ink)!important;border-color:var(--ink)!important;color:#fff!important;}
@@ -162,6 +163,7 @@
   .play-point{position:absolute;transform:translate(-50%,-50%);z-index:10;}
   .play-dot{width:36px;height:36px;border-radius:50%;border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:11px;font-weight:800;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.35);transition:all .18s;cursor:default;}
   .play-dot.drop-over{transform:scale(1.3);box-shadow:0 0 0 6px rgba(255,255,255,0.5),0 2px 12px rgba(0,0,0,0.4);}
+  .play-dot.click-target{box-shadow:0 0 0 4px var(--accent),0 2px 8px rgba(0,0,0,.35);transform:scale(1.12);cursor:pointer;}
   .play-dot.done{opacity:.55;}
   .play-point-label{position:absolute;top:40px;left:50%;transform:translateX(-50%);background:rgba(26,23,20,0.85);color:#fff;font-size:10px;font-family:var(--font-display);font-weight:600;padding:3px 8px;border-radius:99px;white-space:nowrap;pointer-events:none;backdrop-filter:blur(4px);max-width:120px;text-overflow:ellipsis;overflow:hidden;}
 
@@ -686,6 +688,8 @@
             oninput="updateDotSize(this.value)" />
           <span id="dot-size-val" style="font-size:11px;color:var(--ink3);min-width:24px;text-align:right;">28</span>
         </label>
+        <button class="btn multi-select-btn" onclick="toggleMultiSelect()"
+          style="height:34px;padding:0 14px;font-size:12px;font-weight:700;border-radius:var(--radius-sm);border:1.5px solid var(--border-strong);background:var(--surface);color:var(--ink2);cursor:pointer;white-space:nowrap;">⊕ Multi</button>
       </div>
       <div id="schema-word-pool"></div>
       <div class="schema-play-wrap" id="schema-play-wrap">
@@ -901,6 +905,24 @@ function updateSelectionHint() {
     if(poolEl) {
       const hint = document.createElement('div'); hint.className='click-mode-hint';
       hint.innerHTML = `👆 Cliquez sur une zone pour placer ${label}`;
+      if(count > 1) hint.innerHTML += ` <span style="opacity:.6;font-size:10px;">(Ctrl+clic pour ajouter/retirer)</span>`;
+      poolEl.parentNode.insertBefore(hint, poolEl.nextSibling);
+    }
+  } else if(mode === 'schema') {
+    document.querySelectorAll('.play-dot').forEach(d => d.classList.add('click-target'));
+    const poolEl = document.getElementById('schema-word-pool');
+    if(poolEl) {
+      const hint = document.createElement('div'); hint.className='click-mode-hint';
+      hint.innerHTML = `👆 Touchez un point sur l'image pour placer ${label}`;
+      if(count > 1) hint.innerHTML += ` <span style="opacity:.6;font-size:10px;">(Ctrl+clic pour ajouter/retirer)</span>`;
+      poolEl.parentNode.insertBefore(hint, poolEl.nextSibling);
+    }
+  } else if(mode === 'schema') {
+    document.querySelectorAll('.play-dot:not(.done)').forEach(d => d.classList.add('click-target'));
+    const poolEl = document.getElementById('schema-word-pool');
+    if(poolEl) {
+      const hint = document.createElement('div'); hint.className='click-mode-hint';
+      hint.innerHTML = `👆 Cliquez sur un point pour placer ${label}`;
       if(count > 1) hint.innerHTML += ` <span style="opacity:.6;font-size:10px;">(Ctrl+clic pour ajouter/retirer)</span>`;
       poolEl.parentNode.insertBefore(hint, poolEl.nextSibling);
     }
@@ -1693,6 +1715,9 @@ function resetPlay(){
 // SCHEMA MODE — SETUP
 // =====================================================
 function setSchemaPhase(p) {
+  clearClickSelection();
+  multiSelectMode = false;
+  document.querySelectorAll('.multi-select-btn').forEach(b=>{ b.classList.remove('active'); b.textContent='⊕ Multi'; });
   document.getElementById('btn-schema-setup').classList.toggle('active', p==='setup');
   document.getElementById('btn-schema-play').classList.toggle('active', p==='play');
   document.getElementById('schema-setup-panel').classList.toggle('active', p==='setup');
@@ -1973,6 +1998,63 @@ function initSchemaPlay() {
       }
     });
 
+    // ── Click-to-place: fires when chips are selected ──────────────────────
+    dot.addEventListener('click', e => {
+      if(!selectedChips.length || selectedChips[0].mode !== 'schema') return;
+      e.stopPropagation();
+      const toProcess = [...selectedChips];
+      clearClickSelection();
+      let anyCorrect = false;
+      const wrongWords = [];
+
+      for(const sel of toProcess) {
+        const w = sel.chipData.text;
+        const correct = remaining[pt.id] && remaining[pt.id].includes(w);
+        const tag = document.createElement('span');
+        tag.className='placed-word-tag'; tag.textContent=w;
+        tag.style.cssText = correct
+          ? `background:${col}22;border-color:${col};color:${col};`
+          : `background:#fde8e8;border-color:#d44d4d;color:#7a1a1a;`;
+        if(correct) {
+          remaining[pt.id].splice(remaining[pt.id].indexOf(w), 1);
+          remainingByWord[w]--;
+          tag.title='Cliquer pour annuler'; tag.style.cursor='pointer'; tag.style.pointerEvents='auto';
+          tag.addEventListener('click', ()=>{
+            remaining[pt.id].push(w); remainingByWord[w]++; tag.remove(); schemaScore--;
+            document.getElementById('schema-score').textContent=schemaScore;
+            if(![...pool.children].find(el=>el.dataset.word===w))
+              pool.appendChild(makeSchemaChip(w, pool, remaining, remainingByWord));
+            setSchemaFeedback(`"${w}" remis dans la liste.`,'info');
+            if(remaining[pt.id].length>0) dot.classList.remove('done');
+          });
+          placed.appendChild(tag);
+          const src = [...pool.children].find(el=>el.dataset.word===w);
+          if(src && remainingByWord[w] <= 0) src.remove();
+          schemaScore++; document.getElementById('schema-score').textContent=schemaScore;
+          recordCorrect('schema'); anyCorrect = true;
+          if(remaining[pt.id].length===0) dot.classList.add('done');
+          if(schemaScore===totalSlots){ stopScoreTimer('schema'); saveSessionToHistory('schema'); }
+        } else {
+          placed.appendChild(tag); wrongWords.push(w); recordError('schema');
+          setTimeout(()=>tag.remove(), 1400);
+        }
+      }
+
+      if(anyCorrect && !wrongWords.length) setSchemaFeedback(`✓ Bien placé !`, 'ok');
+      else if(wrongWords.length) setSchemaFeedback(`✗ "${wrongWords[0]}" n'appartient pas à ce point.`, 'err');
+
+      // Re-select chips still in pool (multi-point words + wrong words)
+      const reselect = toProcess
+        .map(sel => [...pool.children].find(el=>el.dataset.word===sel.chipData.text))
+        .filter(Boolean)
+        .map(el => ({ chipEl: el, chipData: { text: el.dataset.word }, mode: 'schema', traitId: null }));
+      if(reselect.length) {
+        reselect.forEach(s => s.chipEl.classList.add('chip-selected'));
+        selectedChips = reselect;
+        updateSelectionHint();
+      }
+    });
+
     wrap.appendChild(div);
   });
 }
@@ -1983,6 +2065,10 @@ function makeSchemaChip(word, pool, remaining, remainingByWord) {
   chip.draggable=true; chip.dataset.word=word;
   chip.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', word); setTimeout(()=>chip.classList.add('dragging'),0); });
   chip.addEventListener('dragend', ()=>chip.classList.remove('dragging'));
+  chip.addEventListener('click', e => {
+    e.stopPropagation();
+    handleChipClick(chip, { text: word }, 'schema', null, e.ctrlKey || e.metaKey);
+  });
   return chip;
 }
 
@@ -3417,6 +3503,6 @@ if('serviceWorker' in navigator) {
 })();
 
 </script>
-<div id="patch-badge" style="position:fixed;bottom:10px;right:12px;font-family:var(--font-body);font-size:10px;color:var(--ink3);opacity:.35;pointer-events:none;z-index:9999;letter-spacing:.4px;">patch 17</div>
+<div id="patch-badge" style="position:fixed;bottom:10px;right:12px;font-family:var(--font-body);font-size:10px;color:var(--ink3);opacity:.35;pointer-events:none;z-index:9999;letter-spacing:.4px;">patch 18</div>
 
 </body>
