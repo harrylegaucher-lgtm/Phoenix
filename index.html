@@ -80,7 +80,7 @@
 
   /* SANDBOX GRID */
   .sandbox{display:block;padding:16px;background:var(--surface2);border-radius:var(--radius);min-height:100px;border:1.5px dashed var(--border-strong);}
-  .sandbox:empty::after{content:'Ajoutez une catégorie pour commencer...';font-size:13px;color:var(--ink3);grid-column:1/-1;text-align:center;padding:20px 0;}
+  .sandbox:empty::after{content:'Ajoutez une catégorie pour commencer...';font-size:13px;color:var(--ink3);text-align:center;padding:20px 0;display:block;}
 
   /* CATEGORY CARD */
   .cat-card{background:var(--surface);border-radius:var(--radius);padding:14px;border:2px solid transparent;cursor:pointer;transition:all .18s;box-shadow:var(--shadow);min-height:90px;}
@@ -120,8 +120,6 @@
   .hint{font-size:12px;color:var(--ink3);margin-top:14px;}
 
   /* ======= SCHEMA MODE ======= */
-  #schema-setup-panel, #schema-play-panel{display:none;}
-  #schema-setup-panel.active, #schema-play-panel.active{display:block;}
 
   .schema-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;}
   .schema-hint{font-size:12px;color:var(--ink3);margin-bottom:14px;padding:8px 12px;background:var(--surface2);border-radius:var(--radius-sm);border-left:3px solid var(--border-strong);}
@@ -244,9 +242,6 @@
   .tree-play-drop-zone.over { border-color:var(--accent); background:var(--accent-light); border-style:solid; }
   .tree-placed-chip { font-size:11px; font-weight:600; padding:3px 10px; border-radius:99px; border:1.5px solid; font-family:var(--font-display); cursor:pointer; }
   .tree-placed-chip:hover { filter:brightness(.9); }
-  .tree-play-chip { font-size:11px; font-weight:600; padding:4px 11px; border-radius:99px; border:1.5px solid var(--border-strong); background:var(--surface); color:var(--ink); cursor:grab; font-family:var(--font-display); transition:all .12s; user-select:none; }
-  .tree-play-chip:hover { background:var(--surface2); transform:scale(1.04); }
-  .tree-play-chip.dragging { opacity:.4; }
 
   .tree-setup { display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; }
   .tree-left  { flex:0 0 240px; }
@@ -374,8 +369,7 @@
 
   /* ── PWA / Touch ──────────────────────────────────────────────── */
   * { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-  body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; padding-bottom: env(safe-area-inset-bottom); }
-  #tree-panel, #tree-setup-panel { overflow-x: visible; }
+  body { overscroll-behavior: none; padding-bottom: env(safe-area-inset-bottom); }
   header { padding-top: max(22px, env(safe-area-inset-top)); }
   /* Touch drag ghost */
   #touch-drag-ghost {
@@ -792,7 +786,7 @@
         </div>
       </div>
       <!-- The table -->
-      <div id="tree-table-wrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;max-width:100%;box-sizing:border-box;touch-action:pan-x pan-y;"></div>
+      <div id="tree-table-wrap" style="overflow-x:auto;width:100%;max-width:100%;box-sizing:border-box;touch-action:pan-x pan-y;"></div>
       <p class="hint" style="margin-top:14px;">Les traits sont partagés entre toutes les entités. Cliquez sur une cellule pour ajouter/modifier les valeurs de cette entité pour ce trait.<br>Préfixez une valeur avec <strong>*</strong> pour lui associer une note (ex: <em>*Candida Auris</em>).</p>
       <div class="tree-notes-section" id="tree-notes-section" style="display:none;">
         <div class="tree-notes-title">Notes <span id="tree-notes-count" style="font-weight:400;opacity:.6;"></span></div>
@@ -848,11 +842,10 @@ const PT_COLORS = ['#457BE8','#E08A1A','#2A9D8F','#9B59B6','#27AE60','#1A7A9A','
 // schemaPoints[] : { id, catId, x_pct, y_pct, label }
 //   each point IS a cat — catId links to cats[]
 // ─────────────────────────────────────────────────────────────────
-let cats = [], words = [], selectedCatIdx = null, history = [], currentSaveName = null;
+let cats = [], words = [], selectedCatIdx = null, currentSaveName = null;
 let schemaPoints = [];   // { id, catId, x_pct, y_pct, label }
 let selectedPointId = null;
 let schemaImageDataUrl = null;
-let schemaScore = 0;
 
 // ── CLICK-TO-PLACE STATE ─────────────────────────────────────────
 // selectedChips: array of { chipEl, chipData, mode:'classify'|'tree', traitId? }
@@ -1123,7 +1116,7 @@ function renderAssignSandbox() {
       const word=words.find(w=>w.id===wid); if(!word) return;
       if(!word.catIds.includes(cat.id)){
         word.catIds.push(cat.id);
-        history.push({type:'addCatToWord',wordId:word.id,catId:cat.id});
+        undoStack.push({type:'addCatToWord',wordId:word.id,catId:cat.id});
       }
       renderAssignPool(); renderAssignSandbox(); renderClassifyNotes();
     });
@@ -1241,20 +1234,20 @@ function addWord() {
   const existing = words.find(x => x.text.toLowerCase()===w.toLowerCase());
   if(!existing) {
     const entry = {text:w, catIds:[], id:'w'+Date.now(), starred:hasAsterisk, note:''};
-    words.push(entry); history.push({type:'addWord',id:entry.id});
+    words.push(entry); undoStack.push({type:'addWord',id:entry.id});
   } else if(hasAsterisk) {
     existing.starred=true;
   }
   inp.value=''; renderAssignPool(); updateUndo(); renderClassifyNotes();
 }
 function undoWord() {
-  if (!history.length) return;
-  const last = history.pop();
+  if (!undoStack.length) return;
+  const last = undoStack.pop();
   if (last.type==='addWord') words = words.filter(w=>w.id!==last.id);
   else if (last.type==='addCatToWord') { const w=words.find(x=>x.id===last.wordId); if(w) w.catIds=w.catIds.filter(c=>c!==last.catId); }
   renderSetup(); renderAssignPool(); updateUndo();
 }
-function updateUndo() { document.getElementById('undo-btn').disabled = history.length===0; }
+function updateUndo() { document.getElementById('undo-btn').disabled = undoStack.length===0; }
 function renderSetup() {
   const sb = document.getElementById('sandbox'); sb.innerHTML='';
   const wrap = document.createElement('div'); wrap.className='cat-tree-wrap';
@@ -1971,7 +1964,7 @@ function newSession(){
   document.getElementById('new-modal').classList.add('open');
 }
 function confirmNew(){
-  cats=[];words=[];selectedCatIdx=null;history=[];currentSaveName=null;refParams=[];treeTraits=[];treeEntities=[];treeValues=[];
+  cats=[];words=[];selectedCatIdx=null;undoStack=[];currentSaveName=null;refParams=[];treeTraits=[];treeEntities=[];treeValues=[];
   schemaPoints=[];selectedPointId=null;schemaImageDataUrl=null;
   document.getElementById('sandbox').innerHTML='';
   document.getElementById('schema-no-image').style.display='';
@@ -2006,7 +1999,7 @@ function importFromFile(event){
       treeEntities=(data.treeEntities||[]).map(e=>e.names?e:({...e,names:[e.name||'?']}));
       schemaPoints=data.schemaPoints||[];
       schemaImageDataUrl=data.schemaImageDataUrl||null;
-      selectedCatIdx=cats.length>0?0:null; history=[];
+      selectedCatIdx=cats.length>0?0:null; undoStack=[];
       currentSaveName=data.name||file.name.replace('.json','');
       updateCurrentLabel(currentSaveName);
       renderSetup(); updateIndicator(); updateUndo();
@@ -3247,9 +3240,20 @@ if('serviceWorker' in navigator) {
     let holdTimer = null;
     let started = false;
 
-    const cancel = () => { clearTimeout(holdTimer); };
+    // Detect early move = scroll intent → cancel drag
+    const onMoveCheck = (ev) => {
+      const t = ev.touches[0];
+      const dx = t.clientX-startX, dy = t.clientY-startY;
+      if(Math.abs(dx)>8||Math.abs(dy)>8) cancel();
+    };
+
+    const cancel = () => {
+      clearTimeout(holdTimer);
+      document.removeEventListener('touchmove', onMoveCheck);
+    };
 
     const tryStart = () => {
+      document.removeEventListener('touchmove', onMoveCheck);
       // Fire dragstart
       const transferData = {};
       const fakeEvent = {
@@ -3257,7 +3261,6 @@ if('serviceWorker' in navigator) {
         preventDefault:()=>{}, stopPropagation:()=>{},
         clientX: startX, clientY: startY, target: el
       };
-      // Find and call the dragstart handler
       const handlers = el._dragStartHandlers||[];
       handlers.forEach(h => h.call(el, fakeEvent));
 
@@ -3265,22 +3268,12 @@ if('serviceWorker' in navigator) {
       el.classList.add('dragging');
       createGhost(el, startX, startY);
       started = true;
-      // Attach the non-passive move listener ONLY now that drag has started
       document.addEventListener('touchmove', onDragMove, { passive:false });
       e.preventDefault();
     };
 
-    // Detect: if finger moves before hold, it's a scroll
-    const onMove = (ev) => {
-      if(!started) {
-        const t = ev.touches[0];
-        const dx = t.clientX-startX, dy = t.clientY-startY;
-        if(Math.abs(dx)>8||Math.abs(dy)>8) { cancel(); document.removeEventListener('touchmove',onMove); }
-      }
-    };
-
     holdTimer = setTimeout(tryStart, 50);
-    document.addEventListener('touchmove', onMove, { passive:true, once:true });
+    document.addEventListener('touchmove', onMoveCheck, { passive:true });
     el.addEventListener('touchend', cancel, { once:true });
   }
 
@@ -3366,111 +3359,6 @@ if('serviceWorker' in navigator) {
 })();
 
 </script>
-<div id="patch-badge" style="position:fixed;bottom:10px;right:12px;font-family:var(--font-body);font-size:10px;color:var(--ink3);opacity:.35;pointer-events:none;z-index:9999;letter-spacing:.4px;">patch 13</div>
+<div id="patch-badge" style="position:fixed;bottom:10px;right:12px;font-family:var(--font-body);font-size:10px;color:var(--ink3);opacity:.35;pointer-events:none;z-index:9999;letter-spacing:.4px;">patch 14</div>
 
-<!-- ── DEBUG OVERLAY ───────────────────────────────────────────── -->
-<div id="dbg" style="display:none;position:fixed;bottom:50px;right:8px;width:280px;max-height:55vh;overflow-y:auto;background:rgba(0,0,0,.88);color:#0f0;font:11px/1.5 monospace;padding:10px 12px;border-radius:10px;z-index:99999;box-shadow:0 4px 24px #0008;">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-    <span style="color:#fff;font-weight:700;font-size:12px;">🛠 Debug scroll</span>
-    <button onclick="document.getElementById('dbg').style.display='none'" style="background:#fff2;border:none;color:#fff;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:11px;">×</button>
-  </div>
-  <div id="dbg-body" style="display:flex;flex-direction:column;gap:3px;"></div>
-  <button onclick="dbgClear()" style="margin-top:6px;background:#fff2;border:none;color:#aaa;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:10px;width:100%;">Effacer logs</button>
-</div>
-<button id="dbg-toggle" onclick="dbgToggle()" style="display:none;position:fixed;bottom:50px;right:8px;background:#111;color:#0f0;border:none;border-radius:8px;padding:6px 12px;font:700 11px monospace;cursor:pointer;z-index:99999;box-shadow:0 2px 8px #0006;">🛠 Debug</button>
-
-<script>
-(function(){
-  // ── Toggle visibility ───────────────────────────────────────────
-  const panel = document.getElementById('dbg');
-  const btn   = document.getElementById('dbg-toggle');
-  const body  = document.getElementById('dbg-body');
-
-  // Show debug button always (can be hidden after diagnosis)
-  btn.style.display = 'block';
-
-  window.dbgToggle = function() {
-    const visible = panel.style.display !== 'none';
-    panel.style.display = visible ? 'none' : 'block';
-    btn.style.bottom    = visible ? '50px' : (panel.offsetHeight + 60) + 'px';
-    if(!visible) dbgRefresh();
-  };
-  window.dbgClear = function() { body.innerHTML = ''; };
-
-  function row(label, val, color) {
-    const d = document.createElement('div');
-    d.style.color = color || '#0f0';
-    d.textContent = label + ': ' + val;
-    body.insertBefore(d, body.firstChild);
-    // Keep max 40 lines
-    while(body.children.length > 40) body.removeChild(body.lastChild);
-  }
-
-  // ── Static info about the table wrap ───────────────────────────
-  function dbgRefresh() {
-    const wrap  = document.getElementById('tree-table-wrap');
-    const table = wrap ? wrap.querySelector('table') : null;
-    row('── REFRESH ──', new Date().toLocaleTimeString(), '#888');
-    if(!wrap) { row('tree-table-wrap', 'NOT FOUND', '#f66'); return; }
-    const ws = getComputedStyle(wrap);
-    row('wrap.offsetWidth',   wrap.offsetWidth + 'px');
-    row('wrap.scrollWidth',   wrap.scrollWidth + 'px');
-    row('wrap.scrollLeft',    wrap.scrollLeft  + 'px');
-    row('wrap.overflowX',     ws.overflowX);
-    row('wrap.webkitOverflowScrolling', ws.webkitOverflowScrolling || '(none)');
-    row('wrap.touchAction',   ws.touchAction   || '(none)');
-    if(table) {
-      row('table.offsetWidth', table.offsetWidth + 'px');
-      row('table.whiteSpace',  getComputedStyle(table).whiteSpace);
-      row('overflow?', wrap.scrollWidth > wrap.offsetWidth ? '✅ YES ('+( wrap.scrollWidth - wrap.offsetWidth)+'px)' : '❌ NO', wrap.scrollWidth > wrap.offsetWidth ? '#0f0' : '#f66');
-    } else {
-      row('table', 'NOT FOUND', '#f66');
-    }
-    // Check parent overflow chain
-    let el = wrap.parentElement; let depth = 0;
-    while(el && el !== document.body && depth < 5) {
-      const s = getComputedStyle(el);
-      if(s.overflow !== 'visible' || s.overflowX !== 'visible') {
-        row('parent['+depth+'].id',   el.id || el.className.slice(0,20));
-        row('parent['+depth+'].overflow', s.overflow + ' / ' + s.overflowX, '#fa0');
-      }
-      el = el.parentElement; depth++;
-    }
-    // Touch event listeners (can't enumerate, but check dragState)
-    row('touchmove listeners', 'see below', '#888');
-  }
-  window.dbgRefresh = dbgRefresh;
-
-  // ── Live touch event logging ────────────────────────────────────
-  document.addEventListener('touchstart', function(e) {
-    if(panel.style.display === 'none') return;
-    const wrap = document.getElementById('tree-table-wrap');
-    const inside = wrap && wrap.contains(e.target);
-    row('touchstart' + (inside ? ' [INSIDE WRAP]':''), 
-        'x='+Math.round(e.touches[0].clientX)+' target='+e.target.tagName+(e.target.id?'#'+e.target.id:''),
-        inside ? '#ff0' : '#888');
-  }, { passive:true });
-
-  document.addEventListener('touchmove', function(e) {
-    if(panel.style.display === 'none') return;
-    const wrap = document.getElementById('tree-table-wrap');
-    row('touchmove', 
-        'scroll='+wrap?.scrollLeft?.toFixed(0)+' passive='+(!e.cancelable ? '✅yes':'❌NO—can prevent!'),
-        !e.cancelable ? '#0f0' : '#f66');
-  }, { passive:true });
-
-  document.addEventListener('touchend', function(e) {
-    if(panel.style.display === 'none') return;
-    const wrap = document.getElementById('tree-table-wrap');
-    row('touchend scrollLeft=', wrap?.scrollLeft?.toFixed(0)+'px', '#0af');
-  }, { passive:true });
-
-  // ── Poll scroll position ────────────────────────────────────────
-  setInterval(function() {
-    if(panel.style.display === 'none') return;
-    const wrap = document.getElementById('tree-table-wrap');
-    if(wrap && wrap.scrollLeft > 0) row('✅ SCROLL WORKS! scrollLeft='+wrap.scrollLeft, '', '#0f0');
-  }, 300);
-})();
-</script>
 </body>
