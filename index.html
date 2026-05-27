@@ -675,8 +675,17 @@
 
     <!-- SCHEMA PLAY -->
     <div id="schema-play-panel">
-      <div class="schema-hint">
-        Glissez chaque mot depuis la liste vers le bon point sur l'image. <strong>Cliquez sur un mot placé</strong> pour l'annuler.
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
+        <div class="schema-hint" style="margin:0;flex:1;">
+          Glissez chaque mot depuis la liste vers le bon point sur l'image. <strong>Cliquez sur un mot placé</strong> pour l'annuler.
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink2);white-space:nowrap;background:var(--surface2);padding:6px 12px;border-radius:var(--radius-sm);">
+          ⬤ Taille des points
+          <input type="range" id="dot-size-slider" min="12" max="48" value="28"
+            style="width:80px;accent-color:var(--accent);"
+            oninput="updateDotSize(this.value)" />
+          <span id="dot-size-val" style="font-size:11px;color:var(--ink3);min-width:24px;text-align:right;">28</span>
+        </label>
       </div>
       <div id="schema-word-pool"></div>
       <div class="schema-play-wrap" id="schema-play-wrap">
@@ -1834,6 +1843,24 @@ function deleteSelectedPoint() {
 // =====================================================
 // SCHEMA MODE — PLAY
 // =====================================================
+// ── Dot size control ─────────────────────────────────────────────
+function updateDotSize(val) {
+  const n = parseInt(val);
+  document.getElementById('dot-size-val').textContent = n;
+  document.querySelectorAll('.play-dot').forEach(d => {
+    d.style.width  = n + 'px';
+    d.style.height = n + 'px';
+    d.style.fontSize = Math.max(8, Math.round(n * 0.38)) + 'px';
+  });
+  // Shift label position to match new size
+  document.querySelectorAll('.play-point-label').forEach(l => {
+    l.style.top = (n + 8) + 'px';
+  });
+  document.querySelectorAll('.play-placed-words').forEach(w => {
+    w.style.top = (n + 10) + 'px';
+  });
+}
+
 function initSchemaPlay() {
   if (!schemaImageDataUrl) { alert('Importez d\'abord une image en Phase 1 !'); setSchemaPhase('setup'); return; }
   startScoreTimer('schema');
@@ -1843,37 +1870,43 @@ function initSchemaPlay() {
   document.getElementById('schema-pct').textContent='—';
   document.getElementById('schema-feedback').textContent='';
 
+  // Reset dot size slider
+  const slider = document.getElementById('dot-size-slider');
+  if(slider) { slider.value = 28; document.getElementById('dot-size-val').textContent = 28; }
+
   // Load image
   const playImg = document.getElementById('schema-play-img');
   playImg.src = schemaImageDataUrl;
 
-  // Build all (word, pointId) slots
-  const allSlots = [];
-  schemaPoints.forEach(pt => {
-    wordsOfPoint(pt).forEach(w => { allSlots.push({ slotId:'s'+Date.now()+Math.random(), word:w, ptId:pt.id }); });
-  });
-
-  // remaining placements: ptId -> Set of word slots still needed
+  // Build remaining placements: ptId → [word, word, ...]
   const remaining = {};
   schemaPoints.forEach(pt => { remaining[pt.id] = [...wordsOfPoint(pt)]; });
 
-  document.getElementById('schema-total').textContent = allSlots.length;
+  // Total = sum of all (word × point) pairs
+  let totalSlots = 0;
+  schemaPoints.forEach(pt => { totalSlots += wordsOfPoint(pt).length; });
+  document.getElementById('schema-total').textContent = totalSlots;
+  scoreState['schema'] = scoreState['schema'] || {};
+  scoreState['schema'].total = totalSlots;
 
-  // Build pool chips
-  const pool = document.getElementById('schema-word-pool'); pool.innerHTML='';
-  const shuffled = fisherYates([...allSlots]);
-  shuffled.forEach(slot => {
-    const chip = document.createElement('span');
-    chip.className='chip chip-free pop'; chip.textContent=slot.word;
-    chip.draggable=true; chip.dataset.slotId=slot.slotId;
-    chip.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', slot.slotId); setTimeout(()=>chip.classList.add('dragging'),0); });
-    chip.addEventListener('dragend', ()=>chip.classList.remove('dragging'));
-    pool.appendChild(chip);
+  // Unique words across all points (deduped)
+  const allWords = [];
+  schemaPoints.forEach(pt => wordsOfPoint(pt).forEach(w => { if(!allWords.includes(w)) allWords.push(w); }));
+
+  // remainingByWord: word → number of placements still needed
+  const remainingByWord = {};
+  schemaPoints.forEach(pt => {
+    wordsOfPoint(pt).forEach(w => { remainingByWord[w] = (remainingByWord[w]||0) + 1; });
   });
+
+  // Build pool: one chip per unique word
+  const pool = document.getElementById('schema-word-pool'); pool.innerHTML='';
+  fisherYates([...allWords]).forEach(word => pool.appendChild(makeSchemaChip(word, pool, remaining, remainingByWord)));
 
   // Build play points on image
   const wrap = document.getElementById('schema-play-wrap');
   wrap.querySelectorAll('.play-point').forEach(el=>el.remove());
+  const dotSize = parseInt(document.getElementById('dot-size-slider')?.value || 28);
 
   schemaPoints.forEach((pt, i) => {
     const col = ptColor(i);
@@ -1882,14 +1915,18 @@ function initSchemaPlay() {
     div.dataset.ptId=pt.id;
 
     const dot = document.createElement('div');
-    dot.className='play-dot'; dot.style.background=col; dot.textContent=i+1;
+    dot.className='play-dot';
+    dot.style.cssText=`background:${col};width:${dotSize}px;height:${dotSize}px;font-size:${Math.max(8,Math.round(dotSize*0.38))}px;`;
+    dot.textContent=i+1;
 
     const lbl = document.createElement('div');
-    lbl.className='play-point-label'; lbl.textContent=pt.label||('Point '+(i+1));
+    lbl.className='play-point-label';
+    lbl.style.top = (dotSize + 8) + 'px';
+    lbl.textContent=pt.label||('Point '+(i+1));
 
-    // Placed words container
     const placed = document.createElement('div');
     placed.className='play-placed-words'; placed.id='pp-'+pt.id;
+    placed.style.top = (dotSize + 10) + 'px';
 
     div.appendChild(dot); div.appendChild(lbl); div.appendChild(placed);
 
@@ -1897,51 +1934,56 @@ function initSchemaPlay() {
     dot.addEventListener('dragleave', ()=>dot.classList.remove('drop-over'));
     dot.addEventListener('drop', e => {
       e.preventDefault(); dot.classList.remove('drop-over');
-      const slotId = e.dataTransfer.getData('text/plain');
-      const slot = allSlots.find(s=>s.slotId===slotId); if (!slot) return;
-      const src = [...pool.children].find(el=>el.dataset.slotId===slotId); if (!src) return;
+      const word = e.dataTransfer.getData('text/plain'); if(!word) return;
+      const src = [...pool.children].find(el=>el.dataset.word===word);
 
-      const correct = remaining[pt.id] && remaining[pt.id].includes(slot.word);
+      const correct = remaining[pt.id] && remaining[pt.id].includes(word);
       const tag = document.createElement('span');
-      tag.className='placed-word-tag'; tag.textContent=slot.word; tag.dataset.slotId=slotId;
+      tag.className='placed-word-tag'; tag.textContent=word;
       tag.style.cssText=correct
         ? `background:${col}22;border-color:${col};color:${col};`
         : `background:#fde8e8;border-color:#d44d4d;color:#7a1a1a;`;
 
       if (correct) {
-        const idx2 = remaining[pt.id].indexOf(slot.word);
-        remaining[pt.id].splice(idx2,1);
+        const idx2 = remaining[pt.id].indexOf(word);
+        remaining[pt.id].splice(idx2, 1);
+        remainingByWord[word]--;
         tag.title='Cliquer pour annuler'; tag.style.cursor='pointer'; tag.style.pointerEvents='auto';
         tag.addEventListener('click', ()=>{
-          remaining[pt.id].push(slot.word); tag.remove(); schemaScore--;
+          remaining[pt.id].push(word); remainingByWord[word]++; tag.remove(); schemaScore--;
           document.getElementById('schema-score').textContent=schemaScore;
-          const rc=document.createElement('span');
-          rc.className='chip chip-free pop';rc.textContent=slot.word;rc.draggable=true;rc.dataset.slotId=slot.slotId;
-          rc.addEventListener('dragstart',ev=>{ev.dataTransfer.setData('text/plain',slot.slotId);setTimeout(()=>rc.classList.add('dragging'),0);});
-          rc.addEventListener('dragend',()=>rc.classList.remove('dragging'));
-          pool.appendChild(rc);
-          setSchemaFeedback(`"${slot.word}" remis dans la liste.`,'info');
+          // If chip is no longer in pool, add it back
+          if(![...pool.children].find(el=>el.dataset.word===word))
+            pool.appendChild(makeSchemaChip(word, pool, remaining, remainingByWord));
+          setSchemaFeedback(`"${word}" remis dans la liste.`,'info');
+          if(remaining[pt.id].length>0) dot.classList.remove('done');
         });
-        placed.appendChild(tag); src.remove(); schemaScore++;
+        placed.appendChild(tag);
+        if(src && remainingByWord[word] <= 0) src.remove(); // disappears only when all placements done
+        schemaScore++;
         document.getElementById('schema-score').textContent=schemaScore;
-        setSchemaFeedback(`✓ "${slot.word}" est bien sur le point "${pt.label||'Point '+(i+1)}" !`,'ok');
+        setSchemaFeedback(`✓ "${word}" est bien sur le point "${pt.label||'Point '+(i+1)}" !`,'ok');
+        recordCorrect('schema');
         if(remaining[pt.id].length===0) dot.classList.add('done');
+        if(schemaScore===totalSlots){ stopScoreTimer('schema'); saveSessionToHistory('schema'); }
       } else {
-        placed.appendChild(tag); src.remove();
-        setSchemaFeedback(`✗ "${slot.word}" n'appartient pas à ce point. Réessayez !`,'err'); recordError('schema');
-        setTimeout(()=>{
-          tag.remove();
-          const rc=document.createElement('span');
-          rc.className='chip chip-free pop';rc.textContent=slot.word;rc.draggable=true;rc.dataset.slotId=slot.slotId;
-          rc.addEventListener('dragstart',ev=>{ev.dataTransfer.setData('text/plain',slot.slotId);setTimeout(()=>rc.classList.add('dragging'),0);});
-          rc.addEventListener('dragend',()=>rc.classList.remove('dragging'));
-          pool.appendChild(rc);
-        },1400);
+        placed.appendChild(tag);
+        setSchemaFeedback(`✗ "${word}" n'appartient pas à ce point. Réessayez !`,'err'); recordError('schema');
+        setTimeout(()=>{ tag.remove(); }, 1400);
       }
     });
 
     wrap.appendChild(div);
   });
+}
+
+function makeSchemaChip(word, pool, remaining, remainingByWord) {
+  const chip = document.createElement('span');
+  chip.className='chip chip-free pop'; chip.textContent=word;
+  chip.draggable=true; chip.dataset.word=word;
+  chip.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', word); setTimeout(()=>chip.classList.add('dragging'),0); });
+  chip.addEventListener('dragend', ()=>chip.classList.remove('dragging'));
+  return chip;
 }
 
 function setSchemaFeedback(msg,type){
@@ -3359,6 +3401,6 @@ if('serviceWorker' in navigator) {
 })();
 
 </script>
-<div id="patch-badge" style="position:fixed;bottom:10px;right:12px;font-family:var(--font-body);font-size:10px;color:var(--ink3);opacity:.35;pointer-events:none;z-index:9999;letter-spacing:.4px;">patch 14</div>
+<div id="patch-badge" style="position:fixed;bottom:10px;right:12px;font-family:var(--font-body);font-size:10px;color:var(--ink3);opacity:.35;pointer-events:none;z-index:9999;letter-spacing:.4px;">patch 15</div>
 
 </body>
