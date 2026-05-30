@@ -856,6 +856,7 @@ const PT_COLORS = ['#457BE8','#E08A1A','#2A9D8F','#9B59B6','#27AE60','#1A7A9A','
 //   each point IS a cat — catId links to cats[]
 // ─────────────────────────────────────────────────────────────────
 let cats = [], words = [], selectedCatIdx = null, currentSaveName = null;
+let undoStack = [];
 let schemaPoints = [];   // { id, catId, x_pct, y_pct, label }
 let selectedPointId = null;
 let schemaImageDataUrl = null;
@@ -1256,20 +1257,37 @@ function _reinjectSubCatInput(parentId, col) {
     return;
   }
 }
+let _addingWord = false;
 function addWord() {
+  if(_addingWord) return;
+  _addingWord = true;
+  setTimeout(() => { _addingWord = false; }, 200);
   const inp = document.getElementById('word-input');
-  const raw = inp.value.trim(); if(!raw) return;
+  const raw = inp.value.trim(); if(!raw){ _addingWord=false; return; }
   const hasAsterisk = raw.startsWith('*');
   const w = hasAsterisk ? raw.slice(1).trim() : raw;
-  if(!w) return;
+  if(!w){ _addingWord=false; return; }
   const existing = words.find(x => x.text.toLowerCase()===w.toLowerCase());
   if(!existing) {
     const entry = {text:w, catIds:[], id:'w'+Date.now(), starred:hasAsterisk, note:''};
-    words.push(entry); undoStack.push({type:'addWord',id:entry.id});
+    words.push(entry);
+    undoStack.push({type:'addWord', id:entry.id});
+    // Append chip directly to pool — no full re-render, no blur, no double-fire
+    const pool = document.getElementById('setup-word-pool');
+    if(pool) pool.appendChild(makeSetupPoolChip(entry));
+    const count = document.getElementById('unassigned-count');
+    if(count){
+      const n = words.filter(x=>!x.catIds||x.catIds.length===0).length;
+      count.textContent = n ? `(${n} non assigné${n>1?'s':''})` : '(tous assignés ✓)';
+    }
   } else if(hasAsterisk) {
-    existing.starred=true;
+    existing.starred = true;
+    renderAssignPool();
   }
-  inp.value=''; renderAssignPool(); updateUndo(); renderClassifyNotes();
+  inp.value = '';
+  updateUndo();
+  renderClassifyNotes();
+  inp.focus();
 }
 function undoWord() {
   if (!undoStack.length) return;
@@ -2159,7 +2177,7 @@ function showToast(msg){
 // KEYBOARD SHORTCUTS
 // =====================================================
 document.getElementById('cat-input').addEventListener('keydown',e=>{if(e.key==='Enter')addCategory();});
-document.getElementById('word-input').addEventListener('keydown',e=>{if(e.key==='Enter')addWord();});
+document.getElementById('word-input').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addWord();}});
 document.getElementById('save-name-input').addEventListener('keydown',e=>{if(e.key==='Enter')confirmSave();});
 document.getElementById('point-name-input').addEventListener('keydown',e=>{if(e.key==='Enter')savePointName();});
 document.getElementById('point-word-input').addEventListener('keydown',e=>{if(e.key==='Enter')addWordToPoint();});
