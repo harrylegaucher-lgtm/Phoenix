@@ -1,0 +1,47 @@
+{
+  "name": "Antibiotiques",
+  "cats": [
+    {
+      "name": "Péni M",
+      "id": "c1780175228880",
+      "parentId": null
+    }
+  ],
+  "words": [
+    {
+      "text": "Méticilline",
+      "catIds": [
+        "c1780175228880"
+      ],
+      "id": "w1780175248289",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Oxacilline",
+      "catIds": [
+        "c1780175228880"
+      ],
+      "id": "w1780175254368",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Anti staph Maj",
+      "catIds": [
+        "c1780175228880"
+      ],
+      "id": "w1780175279186",
+      "starred": false,
+      "note": ""
+    }
+  ],
+  "schemaPoints": [],
+  "schemaImageDataUrl": null,
+  "refParams": [],
+  "treeTraits": [],
+  "treeEntities": [],
+  "treeValues": [],
+  "savedAt": "30/05/2026 22:09",
+  "version": 6
+}
