@@ -5,18 +5,49 @@
       "name": "Péni M",
       "id": "c1780175228880",
       "parentId": null
+    },
+    {
+      "name": "Péni A",
+      "id": "c1780176045757",
+      "parentId": null
+    },
+    {
+      "name": "Produits Nitrés",
+      "id": "c1780176273139",
+      "parentId": null
+    },
+    {
+      "name": "dérivés de nitrofurane",
+      "id": "c1780176281698",
+      "parentId": "c1780176273139"
+    },
+    {
+      "name": "imidazolés",
+      "id": "c1780176287779",
+      "parentId": "c1780176273139"
+    },
+    {
+      "name": "MKLS",
+      "id": "c1780177415642",
+      "parentId": null
+    },
+    {
+      "name": "Lincosamides",
+      "id": "c1780177930324",
+      "parentId": "c1780177415642"
+    },
+    {
+      "name": "Kétolides",
+      "id": "c1780177958211",
+      "parentId": "c1780177415642"
+    },
+    {
+      "name": "Azalides",
+      "id": "c1780177960156",
+      "parentId": "c1780177415642"
     }
   ],
   "words": [
-    {
-      "text": "Méticilline",
-      "catIds": [
-        "c1780175228880"
-      ],
-      "id": "w1780175248289",
-      "starred": false,
-      "note": ""
-    },
     {
       "text": "Oxacilline",
       "catIds": [
@@ -34,6 +65,123 @@
       "id": "w1780175279186",
       "starred": false,
       "note": ""
+    },
+    {
+      "text": "Ampicilline",
+      "catIds": [
+        "c1780176045757"
+      ],
+      "id": "w1780176050716",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Amoxicilline",
+      "catIds": [
+        "c1780176045757"
+      ],
+      "id": "w1780176055036",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "qlqs BCN",
+      "catIds": [
+        "c1780176045757"
+      ],
+      "id": "w1780176078858",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Anaérobies",
+      "catIds": [
+        "c1780176287779"
+      ],
+      "id": "w1780176297467",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Méthicilline",
+      "catIds": [
+        "c1780175228880"
+      ],
+      "id": "w1780177354832",
+      "starred": true,
+      "note": "il a été retiré du marchée à caude des trés nombreuses réssistance dévelopées envers lui\n"
+    },
+    {
+      "text": "Cloxacilline",
+      "catIds": [
+        "c1780175228880"
+      ],
+      "id": "w1780177385488",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Azythromycine",
+      "catIds": [
+        "c1780177960156"
+      ],
+      "id": "w1780178013661",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "t1/2 long + inutile méningite",
+      "catIds": [
+        "c1780177960156"
+      ],
+      "id": "w1780178036463",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "dériv erthromycine A",
+      "catIds": [
+        "c1780177958211"
+      ],
+      "id": "w1780178065680",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Telithromycine",
+      "catIds": [
+        "c1780177958211"
+      ],
+      "id": "w1780178072784",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "bonne défusion pulmonaire",
+      "catIds": [
+        "c1780177958211"
+      ],
+      "id": "w1780178079369",
+      "starred": false,
+      "note": ""
+    },
+    {
+      "text": "Lincomycine",
+      "catIds": [
+        "c1780177930324"
+      ],
+      "id": "w1780178106986",
+      "starred": true,
+      "note": "Anti staph maj\n"
+    },
+    {
+      "text": "Clindamycine",
+      "catIds": [
+        "c1780177930324"
+      ],
+      "id": "w1780178111322",
+      "starred": true,
+      "note": "anaérobie\n"
     }
   ],
   "schemaPoints": [],
@@ -42,6 +190,6 @@
   "treeTraits": [],
   "treeEntities": [],
   "treeValues": [],
-  "savedAt": "30/05/2026 22:09",
+  "savedAt": "30/05/2026 22:55",
   "version": 6
 }
