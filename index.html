@@ -1063,14 +1063,15 @@ function setSetupStep(step) {
 }
 
 // Render unassigned words pool (words with no catIds)
+// Render words pool (all words — a word can belong to multiple classes)
 function renderAssignPool() {
   const pool = document.getElementById('setup-word-pool'); if(!pool) return;
   pool.innerHTML='';
-  // Show unassigned words only (catIds empty)
-  const unassigned = words.filter(w=>!w.catIds||w.catIds.length===0);
   const count = document.getElementById('unassigned-count');
-  if(count) count.textContent = unassigned.length ? `(${unassigned.length} non assigné${unassigned.length>1?'s':''})` : '(tous assignés ✓)';
-  unassigned.forEach(w=>{
+  const unassignedCount = words.filter(w=>!w.catIds||w.catIds.length===0).length;
+  if(count) count.textContent = unassignedCount ? `(${unassignedCount} non assigné${unassignedCount>1?'s':''})` : words.length ? '(tous assignés ✓)' : '';
+  // Show ALL words — assigned or not — so a word can be dragged to multiple classes
+  words.forEach(w=>{
     pool.appendChild(makeSetupPoolChip(w));
   });
 }
@@ -1278,7 +1279,7 @@ function addWord() {
     const count = document.getElementById('unassigned-count');
     if(count){
       const n = words.filter(x=>!x.catIds||x.catIds.length===0).length;
-      count.textContent = n ? `(${n} non assigné${n>1?'s':''})` : '(tous assignés ✓)';
+      count.textContent = n ? `(${n} non assigné${n>1?'s':''})` : words.length ? '(tous assignés ✓)' : '';
     }
   } else if(hasAsterisk) {
     existing.starred = true;
