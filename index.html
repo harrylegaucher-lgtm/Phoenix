@@ -2130,7 +2130,7 @@ function confirmSave(){
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   const safe=name.replace(/[^\w\s\-\.]/g,'').trim()||'sauvegarde';
-  a.download=safe+'.json'; a.href=url; a.click(); URL.revokeObjectURL(url);
+  a.download=safe+' [sandbox].json'; a.href=url; a.click(); URL.revokeObjectURL(url);
   currentSaveName=name; updateCurrentLabel(name);
   closeModal('save-modal'); showToast('Fichier "'+safe+'.json" téléchargé !');
 }
